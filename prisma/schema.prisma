@@ -95,7 +95,7 @@ enum Role {
 // Specific to client
 model ClientProfile {
   client_id Int @unique 
-  address String @db.VarChar(255)
+  address String? @db.VarChar(255)
   phone String? @db.VarChar(255)
   coverage String?
   user User @relation(fields: [client_id], references: [user_id], onDelete: Cascade)
