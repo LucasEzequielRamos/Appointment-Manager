@@ -4,34 +4,40 @@ import bcrypt from 'bcrypt'
 
 export async function POST (req: NextRequest) {
   try {
-    const data = await req.json()
+    const { first_name, last_name, email, password, client } = await req.json()
+    console.log(client)
+
+    if (!first_name || !last_name || !email || !password || !client) {
+      return NextResponse.json({ error: 'Todos los campos son obligatorios, incluyendo el perfil de cliente.' }, {status:400});
+    }
 
     const userFound = await db.user.findUnique({
-      where: { email: data.email },
+      where: { email: email },
     });
 
     if (userFound) {
       return NextResponse.json({ message: 'User already exists' }, { status: 409 });
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await db.user.create({
       data: {
-        email: data.email,
+        email: email,
         password: hashedPassword, 
         role: 'CLIENT', 
-        first_name: data.first_name,
-        last_name: data.last_name,
+        first_name: first_name,
+        last_name: last_name,
+        client:{
+          create:{
+            address: client.address,
+            phone: client.phone,
+            coverage: client.coverage
+          }
+        } 
       },
     });
 
-    await db.clientProfile.create({
-      data: {
-        client_id: newUser.user_id,
-        address: data.address
-      },
-    });
 
     return NextResponse.json({ message: 'Client user created successfully', user: newUser }, { status: 201 });
   } catch (error: any) {

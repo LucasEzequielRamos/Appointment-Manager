@@ -1,37 +1,58 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import db from '@/lib/db';
+import {  TimeSlot, WeekDay } from '@prisma/client';
+
+type DayAvailability = {
+  day: WeekDay;            
+  timeSlots: TimeSlot[];  
+};
 
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json();
+    const { first_name, last_name, email, password, professionalProfile  } = await req.json()
+    console.log(professionalProfile )
+
+    if (!first_name || !last_name || !email || !password || !professionalProfile ) {
+      return NextResponse.json({ error: 'Todos los campos son obligatorios, incluyendo el perfil de cliente.' }, {status:400});
+    }
 
     const userFound = await db.user.findUnique({
-      where: { email: data.email },
+      where: { email: email },
     });
 
     if (userFound) {
-      return NextResponse.json({ message: 'User already exists' }, { status: 409 });
+      return NextResponse.json({ message: 'User already exists' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await db.user.create({
       data: {
-        email: data.email,
+        email: email,
         password: hashedPassword,
         role: 'PROFESSIONAL',
-        first_name: data.first_name,
-        last_name: data.last_name,
+        first_name: first_name,
+        last_name: last_name,
+        professional: {
+          create: {
+            availability: {
+              create: professionalProfile.availability.map((availability:DayAvailability) => ({
+                day: availability.day,
+                timeSlots: {
+                  create: availability.timeSlots.map((slot: TimeSlot) => ({
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                  })),
+                },
+              })),
+            },
+          },
+        },
       },
     });
 
-    await db.professionalProfile.create({
-      data: {
-        professional_id: newUser.user_id, 
-        // TODO: add more fields
-      },
-    });
+    
 
     return NextResponse.json({ message: 'Professional user created successfully', user: newUser }, { status: 201 });
   } catch (error: any) {
