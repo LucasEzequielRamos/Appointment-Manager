@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         professional: {
           create: {
             availability: {
-              create: professionalProfile.availability.map((availability:DayAvailability) => ({
+              create: professionalProfile.availability.map((availability: DayAvailability) => ({
                 day: availability.day,
                 timeSlots: {
                   create: availability.timeSlots.map((slot: TimeSlot) => ({
