@@ -8,6 +8,7 @@ const page = async () => {
 
   return (
     <div>
+      <p>fasfa</p>
       <p>Home page</p>
     </div>
   );
