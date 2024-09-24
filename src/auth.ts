@@ -1,51 +1,54 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
-// Your own logic for dealing with plaintext password strings; be careful!
-import { comparePassword } from "@/utils/password"
-import db from '@/lib/db'
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import { comparePassword } from "@/utils/password";
+import db from '@/lib/db';
+import { PrismaAdapter } from "@auth/prisma-adapter";
 
- 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   providers: [
     Credentials({
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
       credentials: {
-        email: { label: 'Email', type: 'text', placeholder:'Enter your email'},
-        password: { label: 'Password', type: 'password', placeholder:'Enter your password'},
+        email: { label: 'Email', type: 'text', placeholder: 'Enter your email' },
+        password: { label: 'Password', type: 'password', placeholder: 'Enter your password' },
       },
       authorize: async (credentials) => {
-        let user = null
-        // logic to verify if the user exists
-        user = await db.user.findUnique({where: {email: credentials.email as string}})
- 
-        if (!user)  return null 
+        const user = await db.user.findUnique({ where: { email: credentials.email as string } });
 
-        const matchPassword = await comparePassword(credentials.password as string, user.password)
+        if (!user) return null;
 
-        if (!matchPassword)  return null 
+        const matchPassword = await comparePassword(credentials.password as string, user.password);
+        if (!matchPassword) return null;
 
-        // return user object with their profile data
-        return user
+        return user;
       },
     }),
   ],
   session: {
     strategy: "jwt",
     maxAge: 100,
-  
   },
-  callbacks:{
-   async jwt({token,user,account,profile, isNewUser} : any){
-    if(user){  
-      console.log(user)
-      token.name = user.first_name
-      token.id = user.id
-      token.email = user.email
-    }
-    return token
-   }
-  }
-})
+  callbacks: {
+    async jwt({ token, user } : any) {
+      if (user) {
+        // Añadir más campos al token
+        token.id = user.id;
+        token.name = user.first_name;
+        token.lastName = user.last_name;
+        token.email = user.email;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token } : any) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.name = token.name;
+        session.user.lastName = token.lastName;
+        session.user.email = token.email;
+        session.user.role = token.role;
+      }
+      return session;
+    },
+  },
+});
