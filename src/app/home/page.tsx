@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import React from "react";
+import LogoutButton from "@/Components/LogoutButton";
 
 const page = async () => {
   const session = await auth();
@@ -8,8 +8,10 @@ const page = async () => {
 
   return (
     <div>
-      <p>fasfa</p>
-      <p>Home page</p>
+      <h1>Welcome, {session?.user?.name}</h1>
+      <p>Email: {session?.user?.email}</p>
+
+      <LogoutButton />
     </div>
   );
 };
