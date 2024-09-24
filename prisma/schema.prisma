@@ -1,0 +1,164 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Availability types
+
+model DayAvailability {
+  id Int @id @default(autoincrement())
+  day WeekDay
+  timeSlots TimeSlot[]
+  professional ProfessionalProfile @relation(fields: [professional_id], references: [professional_id], onDelete: Cascade)
+  professional_id Int
+}
+
+model TimeSlot {
+  id Int @id @default(autoincrement())
+  startTime String 
+  endTime String
+  dayAvailability DayAvailability @relation(fields: [dayAvailabilityId], references: [id], onDelete: Cascade)
+  dayAvailabilityId Int
+}
+
+enum WeekDay {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+}
+
+// Models
+
+model User {
+  user_id Int @id @default(autoincrement())
+  first_name String? @db.VarChar(255)
+  last_name String? @db.VarChar(255)
+  email String @unique @db.VarChar(255)
+  emailVerified DateTime?
+  role Role @default(CLIENT)
+  password String 
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+
+  clientAppointments Appointment[] @relation("ClientAppointments")
+  professionalAppointments Appointment[] @relation("ProfessionalAppointments")
+
+  client ClientProfile?
+  professional ProfessionalProfile?
+
+  accounts      Account[]
+  sessions      Session[]
+  Authenticator Authenticator[]
+}
+
+enum Role {
+  CLIENT
+  PROFESSIONAL
+  ADMIN
+}
+
+// Specific to client
+model ClientProfile {
+  client_id Int @unique 
+  address String @db.VarChar(255)
+  phone String @db.VarChar(255)
+  coverage String
+  user User @relation(fields: [client_id], references: [user_id], onDelete: Cascade)
+}
+
+// Specific to professional
+model ProfessionalProfile {
+  professional_id Int @unique
+  availability DayAvailability[]
+  user User @relation(fields: [professional_id], references: [user_id], onDelete: Cascade)
+}
+
+model Service {
+  id Int @id @default(autoincrement())
+  name String @unique @db.VarChar(255)
+  duration String @db.VarChar(255)
+  coverage String? @db.VarChar(255)
+  appointments Appointment[]
+}
+
+model Appointment {
+  id Int @id @default(autoincrement())
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  appointment_date DateTime @db.Timestamp(0)
+  coverage String? @db.VarChar(255)
+
+  service_id Int
+  service Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
+
+  client_id Int
+  client User @relation("ClientAppointments", fields: [client_id], references: [user_id], onDelete: Cascade)
+
+  professional_id Int
+  professional User @relation("ProfessionalAppointments", fields: [professional_id], references: [user_id], onDelete: Cascade)
+}
+
+
+model Account {
+  user_id            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  }
+ 
+model Session {
+  sessionToken String   @unique
+  user_id       Int
+  expires      DateTime
+  user         User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID String  @unique
+  user_id Int
+  providerAccountId String
+  credentialPublicKey String
+  counter Int
+  credentialDeviceType String
+  credentialBackedUp Boolean
+  transports String?
+ 
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+ 
+  @@id([user_id, credentialID])
+}
