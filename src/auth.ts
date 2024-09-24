@@ -31,8 +31,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user } : any) {
       if (user) {
-        // Añadir más campos al token
         token.id = user.id;
+        token.user_id = user.user_id;
         token.name = user.first_name;
         token.lastName = user.last_name;
         token.email = user.email;
@@ -41,6 +41,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token } : any) {
+      await db.session.create({
+        data: {
+          user_id: token.user_id,
+          sessionToken: token.id,
+          expires: new Date(session.expires),
+        }
+      })
       if (token) {
         session.user.id = token.id;
         session.user.name = token.name;
