@@ -18,12 +18,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         let user = null
-        console.log(credentials)
         // logic to verify if the user exists
         user = await db.user.findUnique({where: {email: credentials.email as string}})
  
         if (!user)  return null 
-        console.log(user)
 
         const matchPassword = await comparePassword(credentials.password as string, user.password)
 
@@ -35,13 +33,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   session: {
-    strategy: "database",
-    maxAge: 30 * 1000
+    strategy: "jwt",
+    maxAge: 100,
+  
   },
   callbacks:{
-    session({session, user}){
-      session.user.id = user.id
-      return session
+   async jwt({token,user,account,profile, isNewUser} : any){
+    if(user){  
+      console.log(user)
+      token.name = user.first_name
+      token.id = user.id
+      token.email = user.email
     }
+    return token
+   }
   }
 })
