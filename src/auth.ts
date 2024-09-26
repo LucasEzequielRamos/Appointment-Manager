@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { comparePassword } from "@/utils/password";
 import db from "@/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import Google from "next-auth/providers/google";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -27,15 +28,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!user) return null;
 
-        const matchPassword = await comparePassword(
-          credentials.password as string,
-          user.password
-        );
-        if (!matchPassword) return null;
+        if(user.password){
+          const matchPassword = await comparePassword(
+            credentials.password as string,
+            user.password
+          );
+          if (!matchPassword) return null;
+        }
 
         return user;
       },
     }),
+    Google({
+      clientId: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
+    })
   ],
   session: {
     strategy: "jwt",
@@ -49,7 +56,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }
   },
   callbacks: {
+    async signIn({ account, profile, query, url }:any) {
+      console.log({account, profile,query,url})
+
+      const action = query?.action || new URL(url).searchParams.get("action");
+      if (account.provider === "google") {
+        const user = await db.user.findUnique({
+          where: { email: profile.email },
+        });
+
+        if (!user) {
+          if (action === "login") {
+            return "/register"; // Redirigir al registro si no está registrado
+          } // Si el usuario no existe y está registrándose, lo dejamos continuar
+          if (action === "register") {
+            await db.user.create({
+              data:{
+                email: profile.email,
+                first_name: profile.given_name,
+                last_name: profile.family_name,   
+
+              }
+            })
+            return '/login';
+          }
+        } else {
+          if (action === "register") {
+            return "/login"; // Redirigir al login si ya está registrado
+          }
+          return true; 
+        }
+      }
+      return true; // Continuar el flujo para otros proveedores
+    },
     async jwt({ token, user }: any) {
+      console.log(user, token)
       if (user) {
         token.id = user.id;
         token.user_id = user.user_id;
@@ -60,7 +101,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return token;
     },
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
     async session({ session, token }: any) {
+      if(!token) return null
       const dbSessions = await db.session.findMany({
         where: {
           user_id: token.user_id,
@@ -93,5 +138,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
+
+  },
+  pages: {
+    signIn: '/login',
+    signOut: '/logout',
+    error: '/auth/error',
   },
 });
