@@ -4,11 +4,7 @@ import { signOut } from "next-auth/react";
 
 const LogoutButton = () => {
   return (
-    <button
-      onClick={() =>
-        signOut({ redirect: false, redirectTo: "/api/auth/signin" })
-      }
-    >
+    <button onClick={() => signOut({ redirect: true, redirectTo: "/" })}>
       Sign Out
     </button>
   );

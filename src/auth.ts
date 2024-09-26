@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthError } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { comparePassword } from "@/utils/password";
 import db from "@/lib/db";
@@ -26,14 +26,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: credentials.email as string },
         });
 
-        if (!user) return null;
+
+        if (!user) throw new Error('user not found');
 
         if(user.password){
           const matchPassword = await comparePassword(
             credentials.password as string,
             user.password
           );
-          if (!matchPassword) return null;
+          if (!matchPassword) throw new Error('password mismatch');
         }
 
         return user;
@@ -56,38 +57,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }
   },
   callbacks: {
-    async signIn({ account, profile, query, url }:any) {
-      console.log({account, profile,query,url})
+    async signIn({ user, account, profile}) {
+      if(!user) return false
+    
+      console.log({account, profile, user})
 
-      const action = query?.action || new URL(url).searchParams.get("action");
-      if (account.provider === "google") {
+      if (account?.provider === "google") {
         const user = await db.user.findUnique({
-          where: { email: profile.email },
+          where: { email: profile?.email as string },
         });
 
-        if (!user) {
-          if (action === "login") {
-            return "/register"; // Redirigir al registro si no está registrado
-          } // Si el usuario no existe y está registrándose, lo dejamos continuar
-          if (action === "register") {
-            await db.user.create({
-              data:{
-                email: profile.email,
-                first_name: profile.given_name,
-                last_name: profile.family_name,   
-
-              }
-            })
-            return '/login';
-          }
-        } else {
-          if (action === "register") {
-            return "/login"; // Redirigir al login si ya está registrado
-          }
-          return true; 
-        }
-      }
-      return true; // Continuar el flujo para otros proveedores
+}
+      return true;
     },
     async jwt({ token, user }: any) {
       console.log(user, token)
@@ -100,9 +81,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role;
       }
       return token;
-    },
-    async redirect({ url, baseUrl }) {
-      return url.startsWith(baseUrl) ? url : baseUrl;
     },
     async session({ session, token }: any) {
       if(!token) return null
@@ -141,8 +119,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   },
   pages: {
-    signIn: '/login',
-    signOut: '/logout',
+    signIn: '/auth/login',
     error: '/auth/error',
   },
 });
