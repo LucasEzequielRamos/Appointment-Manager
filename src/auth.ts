@@ -4,6 +4,7 @@ import { comparePassword } from "@/utils/password";
 import db from "@/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Google from "next-auth/providers/google";
+import { url } from "inspector";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -43,6 +44,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      },
+      allowDangerousEmailAccountLinking: true
     })
   ],
   session: {
@@ -57,16 +66,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }
   },
   callbacks: {
-    async signIn({ user, account, profile}) {
-      if(!user) return false
-    
-      console.log({account, profile, user})
+    async signIn({ account, profile}) {
+      // console.log({account, profile})
 
       if (account?.provider === "google") {
-        const user = await db.user.findUnique({
+        const userFound = await db.user.findUnique({
           where: { email: profile?.email as string },
         });
 
+        console.log(userFound)
+
+        if(!userFound){
+           return `/auth/register?email=${profile?.email}&first_name=${profile?.given_name}&last_name=${profile?.family_name}`
+        }
+        // {url: '/auth/register', profile}
+       
 }
       return true;
     },

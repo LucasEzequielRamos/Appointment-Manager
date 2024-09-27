@@ -1,6 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import SignInGoogleButton from "@/components/signin-google-button";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 interface User {
@@ -11,24 +13,29 @@ interface User {
   address?: string;
   phone?: string;
   coverage?: string;
+  other_coverage?: string;
 }
 
 const RegisterForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams(); // Para obtener los parámetros de la URL
 
   const [user, setUser] = useState<User>({
-    email: "",
+    email: searchParams?.get("email") || "",
     password: "",
-    first_name: "",
-    last_name: "",
+    first_name: searchParams?.get("first_name") || "",
+    last_name: searchParams?.get("last_name") || "",
     address: "",
     phone: "",
     coverage: "",
+    other_coverage: "",
   });
 
   const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setUser({
       ...user,
@@ -133,21 +140,47 @@ const RegisterForm = () => {
           </div>
           <div>
             <label className="block text-sm font-medium">Cobertura</label>
-            <input
-              type="text"
-              name="coverage"
-              value={user?.coverage}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
+            {user.coverage !== "" ? (
+              <input
+                type="text"
+                name="other_coverage"
+                value={user.other_coverage || ""}
+                onChange={handleChange}
+                placeholder="Especifique otra cobertura"
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            ) : (
+              <select
+                name="coverage"
+                value={user.coverage}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded"
+              >
+                <option value="">Seleccione una opción</option>
+                <option value="ninguna">Ninguna</option>
+                <option value="bronce">Bronce</option>
+                <option value="plata">Plata</option>
+                <option value="oro">Oro</option>
+                <option value="other">Otra (especificar)</option>
+              </select>
+            )}
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+            className="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
           >
             Registrarse
           </button>
+          <SignInGoogleButton />
         </form>
+        <div className="text-center mt-6">
+          <p className="text-gray-600">
+            ¿Ya tienes una cuenta?{" "}
+            <Link href="/auth/login" className="text-blue-500 hover:underline">
+              Inicia Sesion
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

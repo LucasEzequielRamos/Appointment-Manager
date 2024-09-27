@@ -1,5 +1,6 @@
 "use client";
 
+import SignInGoogleButton from "@/components/signin-google-button";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -76,6 +77,7 @@ const LoginForm = () => {
           >
             Iniciar Sesión
           </button>
+          <SignInGoogleButton />
         </form>
         <div className="text-center mt-6">
           <p className="text-gray-600">
