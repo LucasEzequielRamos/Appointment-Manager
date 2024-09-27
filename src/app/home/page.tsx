@@ -1,15 +1,18 @@
 import { auth } from "@/auth";
-import React from "react";
+import LogoutButton from "@/components/LogoutButton";
+import { redirect } from "next/navigation";
 
 const page = async () => {
   const session = await auth();
-
+  if (!session) redirect("/");
   console.log(session, "SESSION DESDE HOME");
 
   return (
     <div>
-      <p>fasfa</p>
-      <p>Home page</p>
+      <h1>Welcome, {session?.user?.name}</h1>
+      <p>Email: {session?.user?.email}</p>
+
+      <LogoutButton />
     </div>
   );
 };

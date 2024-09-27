@@ -1,51 +1,125 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
-// Your own logic for dealing with plaintext password strings; be careful!
-import { comparePassword } from "@/utils/password"
-import db from '@/lib/db'
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import NextAuth, { AuthError } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import { comparePassword } from "@/utils/password";
+import db from "@/lib/db";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import Google from "next-auth/providers/google";
 
- 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   providers: [
     Credentials({
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
       credentials: {
-        email: { label: 'Email', type: 'text', placeholder:'Enter your email'},
-        password: { label: 'Password', type: 'password', placeholder:'Enter your password'},
+        email: {
+          label: "Email",
+          type: "text",
+          placeholder: "Enter your email",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+          placeholder: "Enter your password",
+        },
       },
       authorize: async (credentials) => {
-        let user = null
-        // logic to verify if the user exists
-        user = await db.user.findUnique({where: {email: credentials.email as string}})
- 
-        if (!user)  return null 
+        const user = await db.user.findUnique({
+          where: { email: credentials.email as string },
+        });
 
-        const matchPassword = await comparePassword(credentials.password as string, user.password)
 
-        if (!matchPassword)  return null 
+        if (!user) throw new Error('user not found');
 
-        // return user object with their profile data
-        return user
+        if(user.password){
+          const matchPassword = await comparePassword(
+            credentials.password as string,
+            user.password
+          );
+          if (!matchPassword) throw new Error('password mismatch');
+        }
+
+        return user;
       },
     }),
+    Google({
+      clientId: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
+    })
   ],
   session: {
     strategy: "jwt",
-    maxAge: 100,
-  
+    maxAge: 60 * 60 * 24,
   },
-  callbacks:{
-   async jwt({token,user,account,profile, isNewUser} : any){
-    if(user){  
-      console.log(user)
-      token.name = user.first_name
-      token.id = user.id
-      token.email = user.email
+  events: {
+    async signOut(message : any) {
+      await db.session.delete({
+        where: { sessionToken: message.token.id },
+      })
     }
-    return token
-   }
-  }
-})
+  },
+  callbacks: {
+    async signIn({ user, account, profile}) {
+      if(!user) return false
+    
+      console.log({account, profile, user})
+
+      if (account?.provider === "google") {
+        const user = await db.user.findUnique({
+          where: { email: profile?.email as string },
+        });
+
+}
+      return true;
+    },
+    async jwt({ token, user }: any) {
+      console.log(user, token)
+      if (user) {
+        token.id = user.id;
+        token.user_id = user.user_id;
+        token.name = user.first_name;
+        token.lastName = user.last_name;
+        token.email = user.email;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }: any) {
+      if(!token) return null
+      const dbSessions = await db.session.findMany({
+        where: {
+          user_id: token.user_id,
+        },
+      });
+
+      for (const dbSession of dbSessions) {
+        if (new Date() > dbSession.expires) {
+          console.log(dbSession, 'expired')
+          await db.session.delete({
+            where: { sessionToken: dbSession.sessionToken },
+          });
+        }
+      }
+
+      await db.session.create({
+        data: {
+          user_id: token.user_id,
+          sessionToken: token.id,
+          expires: new Date(session.expires),
+        },
+      });
+      
+      if (token) {
+        session.user.id = token.id;
+        session.user.name = token.name;
+        session.user.lastName = token.lastName;
+        session.user.email = token.email;
+        session.user.role = token.role;
+      }
+      return session;
+    },
+
+  },
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
+  },
+});
