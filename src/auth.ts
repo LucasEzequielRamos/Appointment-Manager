@@ -4,7 +4,6 @@ import { comparePassword } from "@/utils/password";
 import db from "@/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Google from "next-auth/providers/google";
-import { url } from "inspector";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -74,18 +73,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: profile?.email as string },
         });
 
-        console.log(userFound)
 
         if(!userFound){
            return `/auth/register?email=${profile?.email}&first_name=${profile?.given_name}&last_name=${profile?.family_name}`
         }
-        // {url: '/auth/register', profile}
+
+        const accountFound =  await db.account.findFirst({
+          where: { user_id: userFound.user_id },
+        });
+
+        if(!accountFound){
+          await db.account.create({
+            data: {
+              access_token: account.access_token,
+              id_token: account.id_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+              scope: account.scope,
+              token_type: account.token_type,
+              providerAccountId: account.providerAccountId,
+              provider: account.provider,
+              type: account.type,
+              user_id: userFound.user_id  
+            }
+          });
+        }
+       return true
        
 }
       return true;
     },
     async jwt({ token, user }: any) {
-      console.log(user, token)
       if (user) {
         token.id = user.id;
         token.user_id = user.user_id;
@@ -94,7 +112,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.email = user.email;
         token.role = user.role;
       }
-      return token;
+      if(token) return token;
     },
     async session({ session, token }: any) {
       if(!token) return null
@@ -104,30 +122,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       });
 
-      for (const dbSession of dbSessions) {
-        if (new Date() > dbSession.expires) {
-          console.log(dbSession, 'expired')
-          await db.session.delete({
-            where: { sessionToken: dbSession.sessionToken },
-          });
+      if(dbSessions){
+        for (const dbSession of dbSessions) {
+          if (new Date() > dbSession.expires) {
+            console.log(dbSession, 'expired')
+            await db.session.delete({
+              where: { sessionToken: dbSession.sessionToken },
+            });
+          }
         }
       }
-
-      await db.session.create({
-        data: {
-          user_id: token.user_id,
-          sessionToken: token.id,
-          expires: new Date(session.expires),
-        },
-      });
       
-      if (token) {
-        session.user.id = token.id;
+     
+        const sessionFound = await db.session.findUnique({
+          where: {sessionToken: token.jti}
+        })
+
+        if(!sessionFound){
+
+          await db.session.create({
+            data: {
+              user_id: token.user_id,
+              sessionToken: token.jti,
+              expires: new Date(session.expires),
+            },
+          });
+        }
+      
+        session.user.id = token.jti;
         session.user.name = token.name;
         session.user.lastName = token.lastName;
         session.user.email = token.email;
         session.user.role = token.role;
-      }
+      
       return session;
     },
 
