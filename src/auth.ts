@@ -1,4 +1,4 @@
-import NextAuth, { AuthError } from "next-auth";
+import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { comparePassword } from "@/utils/password";
 import db from "@/lib/db";
@@ -59,49 +59,58 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async signOut(message : any) {
+      console.log({message})
       await db.session.delete({
-        where: { sessionToken: message.token.id },
+        where: { sessionToken: message.token.jti },
       })
     }
   },
   callbacks: {
-    async signIn({ account, profile}) {
-      // console.log({account, profile})
+    async signIn({ account, profile, user}) {
+      console.log({account,profile, user})
+      let userFound;
 
-      if (account?.provider === "google") {
-        const userFound = await db.user.findUnique({
+      if (profile){
+        userFound = await db.user.findUnique({
           where: { email: profile?.email as string },
         });
-
-
-        if(!userFound){
-           return `/auth/register?email=${profile?.email}&first_name=${profile?.given_name}&last_name=${profile?.family_name}`
+        
+        
+        if(!userFound && account?.provider === 'google'){
+          return `/auth/register?email=${profile?.email}&first_name=${profile?.given_name}&last_name=${profile?.family_name}`
         }
-
+      }else{
+        userFound = await db.user.findUnique({
+          where: { email: user?.email as string },
+        });
+        
+      }
+      
+      if(userFound){
         const accountFound =  await db.account.findFirst({
           where: { user_id: userFound.user_id },
         });
-
-        if(!accountFound){
-          await db.account.create({
-            data: {
-              access_token: account.access_token,
-              id_token: account.id_token,
-              refresh_token: account.refresh_token,
-              expires_at: account.expires_at,
-              scope: account.scope,
-              token_type: account.token_type,
-              providerAccountId: account.providerAccountId,
-              provider: account.provider,
-              type: account.type,
-              user_id: userFound.user_id  
-            }
-          });
+          
+          if(!accountFound && account){
+            await db.account.create({
+              data: {
+                access_token: account.access_token,
+                id_token: account.id_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+                scope: account.scope,
+                token_type: account.token_type,
+                providerAccountId: account.providerAccountId,
+                provider: account.provider,
+                type: account.type,
+                user_id: userFound.user_id  
+              }
+            });
+          }        
         }
        return true
        
-}
-      return true;
+
     },
     async jwt({ token, user }: any) {
       if (user) {
@@ -122,13 +131,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       });
 
-      if(dbSessions){
+      if(dbSessions && dbSessions.length > 0){
         for (const dbSession of dbSessions) {
           if (new Date() > dbSession.expires) {
-            console.log(dbSession, 'expired')
-            await db.session.delete({
+
+            const sessionExists = await db.session.findUnique({
               where: { sessionToken: dbSession.sessionToken },
             });
+
+            if(sessionExists){
+              console.log(dbSession, 'expired')
+              await db.session.delete({
+                where: { sessionToken: dbSession.sessionToken },
+              });
+            }
+
           }
         }
       }
