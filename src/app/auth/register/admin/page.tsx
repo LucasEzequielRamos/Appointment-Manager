@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { Button } from "@/Components/ui/button"
+import { Button } from "@/Components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,8 +12,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/Components/ui/form"
-import { Input } from "@/Components/ui/input"
+} from "@/Components/ui/form";
+import { Input } from "@/Components/ui/input";
+import { useRouter } from "next/navigation";
 
 const formSchema = z
   .object({
@@ -28,7 +29,8 @@ const formSchema = z
       message: "La contraseña debe contener al menos 8 caracteres",
     }),
     confirmPassword: z.string().min(8, {
-      message: "La confirmación de la contraseña debe tener al menos 8 caracteres",
+      message:
+        "La confirmación de la contraseña debe tener al menos 8 caracteres",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -40,26 +42,39 @@ export function page() {
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema)
-  })
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      first_name: "", 
+      last_name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const res = await fetch("/api/register/admin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
-    });
-    const data = await res.json();
-    if (data.status === 201) router.push("/auth/login");
-
+    try {
+      const res = await fetch("/api/register/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json();
+      // TODO: Toast with created successfully and back to home or register another admin
+      if (data.status === 201) router.push("/auth/login");
+    } catch (error) {
+      console.log(error); // TODO: Toast with error
+    }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}
-      className="flex flex-col items-center justify-center">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col items-center justify-center"
+      >
         <FormField
           control={form.control}
           name="first_name"
@@ -67,7 +82,7 @@ export function page() {
             <FormItem>
               <FormLabel>Nombre</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ""} /> 
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -80,7 +95,7 @@ export function page() {
             <FormItem>
               <FormLabel>Apellido</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ""} /> 
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -93,7 +108,7 @@ export function page() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value || ""} /> 
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -106,7 +121,7 @@ export function page() {
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="password" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -119,7 +134,7 @@ export function page() {
             <FormItem>
               <FormLabel>Confirmar contraseña</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="password" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -128,7 +143,7 @@ export function page() {
         <Button type="submit">Registrarse</Button>
       </form>
     </Form>
-  )
+  );
 }
 
-export default page
+export default page;
