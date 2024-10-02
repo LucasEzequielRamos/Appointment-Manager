@@ -1,6 +1,6 @@
 "use client";
 
-import SignInGoogleButton from "@/components/signin-google-button";
+import SignInGoogleButton from "@/Components/SigninGoogleButton";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -63,7 +63,7 @@ const RegisterForm = () => {
       body: JSON.stringify(user),
     });
     const data = await res.json();
-    if (data.status === 200) router.push("/auth/login");
+    if (data.status === 201) router.push("/auth/login");
 
     setError(data.message);
   };

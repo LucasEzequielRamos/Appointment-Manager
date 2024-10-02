@@ -6,20 +6,19 @@ import { saltAndHashPassword } from "@/utils/password"
 export async function POST (req: NextRequest) {
   try {
     const { first_name, last_name, email, password, address, phone, coverage } = await req.json()
-    console.log(address, phone, coverage)
 
-    if(!email) return NextResponse.json({ error: 'El mail es obligatorio.' }, {status:400});
+    if(!email) return NextResponse.json({ error: 'El mail es obligatorio.' }, { status: 400 });
     
     const userFound = await db.user.findUnique({
       where: { email: email },
     });
 
     if (userFound) {
-      return NextResponse.json({ message: 'User already exists', status:400 });
+      return NextResponse.json({ message: 'User already exists', status: 400 });
     }
 
     if (!first_name || !last_name || !password || !address || !phone || !coverage) {
-      return NextResponse.json({ message: 'Todos los campos son obligatorios' ,status:400});
+      return NextResponse.json({ message: 'Todos los campos son obligatorios', status: 400 });
     }
 
     const hashedPassword = await saltAndHashPassword(password)
@@ -42,7 +41,7 @@ export async function POST (req: NextRequest) {
     });
 
 
-    return NextResponse.json({ message: 'Client user created successfully', user: newUser , status: 200 });
+    return NextResponse.json({ message: 'Client user created successfully', user: newUser , status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({

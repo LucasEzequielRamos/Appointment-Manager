@@ -27,14 +27,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
 
-        if (!user) throw new Error('user not found');
+        if (!user) throw new Error('email or password incorrect');
 
         if(user.password){
           const matchPassword = await comparePassword(
             credentials.password as string,
             user.password
           );
-          if (!matchPassword) throw new Error('password mismatch');
+          if (!matchPassword) throw new Error('email or password incorrect');
         }
 
         return user;
@@ -59,18 +59,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async signOut(message : any) {
-      console.log({message})
       await db.session.delete({
         where: { sessionToken: message.token.jti },
       })
     }
   },
   callbacks: {
-    async signIn({ account, profile, user}) {
-      console.log({account,profile, user})
+    async signIn({ account, profile, user }) {
       let userFound;
 
-      if (profile){
+      if (profile) { // if OAuth profile
         userFound = await db.user.findUnique({
           where: { email: profile?.email as string },
         });
@@ -79,14 +77,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if(!userFound && account?.provider === 'google'){
           return `/auth/register?email=${profile?.email}&first_name=${profile?.given_name}&last_name=${profile?.family_name}`
         }
-      }else{
+      } else { // if Credentials
         userFound = await db.user.findUnique({
           where: { email: user?.email as string },
         });
-        
       }
       
-      if(userFound){
+      if(userFound){ 
         const accountFound =  await db.account.findFirst({
           where: { user_id: userFound.user_id },
         });
@@ -112,7 +109,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
        
 
     },
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, account, profile }: any) {
       if (user) {
         token.id = user.id;
         token.user_id = user.user_id;

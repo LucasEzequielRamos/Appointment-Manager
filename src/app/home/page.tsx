@@ -1,11 +1,11 @@
 import { auth } from "@/auth";
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/Components/LogoutButton";
 import { redirect } from "next/navigation";
 
 const page = async () => {
   const session = await auth();
   if (!session) redirect("/");
-  console.log(session, "SESSION DESDE HOME");
+  // console.log(session, "SESSION DESDE HOME");
 
   return (
     <div>
