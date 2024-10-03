@@ -5,6 +5,23 @@ import db from "@/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Google from "next-auth/providers/google";
 
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      last_name?: string; 
+      role?: string; 
+    };
+  }
+
+  interface User {
+    last_name?: string;
+    role?: string;
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   providers: [
@@ -21,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           placeholder: "Enter your password",
         },
       },
-      authorize: async (credentials) => {
+      authorize: async (credentials):Promise<any> => {
         const user = await db.user.findUnique({
           where: { email: credentials.email as string },
         });
@@ -120,11 +137,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       if(token) return token;
     },
-    async session({ session, token }: any) {
+    async session({ session, token }): Promise<any> {
       if(!token) return null
       const dbSessions = await db.session.findMany({
         where: {
-          user_id: token.user_id,
+          user_id: token.user_id as number,
         },
       });
 
@@ -156,18 +173,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           await db.session.create({
             data: {
-              user_id: token.user_id,
-              sessionToken: token.jti,
+              user_id: token.user_id  as number,
+              sessionToken: token.jti  as string,
               expires: new Date(session.expires),
             },
           });
         }
       
-        session.user.id = token.jti;
-        session.user.name = token.name;
-        session.user.lastName = token.lastName;
-        session.user.email = token.email;
-        session.user.role = token.role;
+        session.user={
+          ...session.user,
+          id: token.jti as string,
+          name: token.name as string,
+          email: token.email  as string,
+          last_name: token.lastName  as string,
+          role: token.role  as string,
+        }
       
       return session;
     },

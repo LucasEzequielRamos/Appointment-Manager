@@ -9,6 +9,7 @@ export async function POST (req: NextRequest) {
 
     if(!email) return NextResponse.json({ error: 'El mail es obligatorio.' }, { status: 400 });
     
+    
     const userFound = await db.user.findUnique({
       where: { email: email },
     });
@@ -21,13 +22,15 @@ export async function POST (req: NextRequest) {
       return NextResponse.json({ message: 'Todos los campos son obligatorios', status: 400 });
     }
 
+    const isAdmin = email === 'lucas@admin.com' ?  'ADMIN' : 'CLIENT'
+
     const hashedPassword = await saltAndHashPassword(password)
 
     const newUser = await db.user.create({
       data: {
         email: email,
         password: hashedPassword, 
-        role: 'CLIENT', 
+        role: isAdmin, 
         first_name: first_name,
         last_name: last_name,
         client:{

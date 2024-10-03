@@ -15,6 +15,7 @@ import {
 } from "@/Components/ui/form";
 import { Input } from "@/Components/ui/input";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const formSchema = z
   .object({
@@ -33,7 +34,7 @@ const formSchema = z
         "La confirmación de la contraseña debe tener al menos 8 caracteres",
     }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Las contraseñas no coinciden",
   });
@@ -44,7 +45,7 @@ export function page() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: "", 
+      first_name: "",
       last_name: "",
       email: "",
       password: "",
@@ -63,6 +64,7 @@ export function page() {
       });
       const data = await res.json();
       // TODO: Toast with created successfully and back to home or register another admin
+      console.log(data);
       if (data.status === 201) router.push("/auth/login");
     } catch (error) {
       console.log(error); // TODO: Toast with error
@@ -82,7 +84,7 @@ export function page() {
             <FormItem>
               <FormLabel>Nombre</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ""} /> 
+                <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,7 +97,7 @@ export function page() {
             <FormItem>
               <FormLabel>Apellido</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ""} /> 
+                <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -108,7 +110,7 @@ export function page() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ""} /> 
+                <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
