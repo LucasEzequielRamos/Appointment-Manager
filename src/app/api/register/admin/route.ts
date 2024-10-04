@@ -4,19 +4,20 @@ import { saltAndHashPassword } from "@/utils/password"
 import { auth } from '@/auth'
 
 
-export async function POST (req: NextRequest) {
+export async function POST (req: Request) {
   try {
     const session = await auth()
-    console.log(session)
+    console.log({session})
     if (!session) {
-        return NextResponse.json({ message: 'Session not exist', status: 401 });
+      return NextResponse.json({ error: 'Session dont exist' }, { status: 401 });
     }
+    console.log(!session)
     
     if ( session.user.role !== 'ADMIN'){return NextResponse.json({ message: 'Unauthorized, you don´t have permission', status: 401 });}
 
     const { first_name, last_name, email, password, confirmPassword } = await req.json()
 
-    console.log(email)
+    console.log({email})
     if(!email) {return NextResponse.json({ error: 'El mail es obligatorio.' ,  status: 400 })};
 
     if(email.split('@')[1] !== 'admin.com') {return NextResponse.json({ error: 'El mail no es permitido, debe finalizar en @admin.com.' ,  status: 400 });}
