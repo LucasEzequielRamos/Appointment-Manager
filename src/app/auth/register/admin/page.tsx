@@ -63,14 +63,21 @@ export function page() {
         body: JSON.stringify(values),
       });
       const data = await res.json();
-      console.log(data)
+      if (res.status !== 201) {
+        throw new Error(`Error ${res.status}: ${data.message}`, );
+      }
       // TODO: Toast with created successfully and back to home or register another admin
+      toast({
+        title: 'Usuario creado correctamente',
+        variant: 'success',
+        description: `El usuario administrador se ha creado correctamente`
+      })
       if (data.status === 201) router.push("/auth/login");
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
       toast({
         title: 'Algo ha salido mal',
-        description: 'Hubo un problema con tu respuesta, por favor, intentalo de nuevo mas tarde',
+        variant: 'destructive',
+        description: `Hubo un problema con tu respuesta, por favor, intentalo de nuevo mas tarde. ${error.message}`,
       })
     }
   }

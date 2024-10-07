@@ -2,64 +2,77 @@ import { type NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db'
 import { saltAndHashPassword } from "@/utils/password"
 import { auth } from '@/auth'
+import HTTPError from '@/utils/HTTPError';
 
-
-export async function POST (req: Request) {
+export async function POST(req: Request) {
   try {
-    const session = await auth()
-    console.log({session})
+    const session = await auth();
+    console.log({ session });
+
     if (!session) {
-      return NextResponse.json({ error: 'Session dont exist' }, { status: 401 });
+      throw new HTTPError('Session does not exist', 401);
     }
-    console.log(!session)
-    
-    if ( session.user.role !== 'ADMIN'){return NextResponse.json({ message: 'Unauthorized, you don´t have permission', status: 401 });}
 
-    const { first_name, last_name, email, password, confirmPassword } = await req.json()
+    if (session.user.role !== 'ADMIN') {
+      throw new HTTPError('Unauthorized, you don’t have permission', 401);
+    }
 
-    console.log({email})
-    if(!email) {return NextResponse.json({ error: 'El mail es obligatorio.' ,  status: 400 })};
+    const { first_name, last_name, email, password, confirmPassword } = await req.json();
 
-    if(email.split('@')[1] !== 'admin.com') {return NextResponse.json({ error: 'El mail no es permitido, debe finalizar en @admin.com.' ,  status: 400 });}
-    
+    console.log({ email });
+    if (!email) {
+      throw new HTTPError('El email es obligatorio.', 400);
+    }
+
     const userFound = await db.user.findUnique({
-        where: { email: email },
+      where: { email },
     });
 
     if (userFound) {
-        return NextResponse.json({ message: 'User already exists', status: 400 });
+      throw new HTTPError('Usuario ya existente', 400);
     }
 
     if (password !== confirmPassword) {
-        return NextResponse.json({ message: 'Las contraseñas no coinciden', status: 400 });
+      throw new HTTPError('Las contraseñas no coinciden', 400);
     }
 
     if (!first_name || !last_name || !password || !confirmPassword) {
-        return NextResponse.json({ message: 'Todos los campos son obligatorios', status: 400 });
+      throw new HTTPError('Todos los campos son obligatorios', 400);
     }
 
-    const hashedPassword = await saltAndHashPassword(password)
+    const hashedPassword = await saltAndHashPassword(password);
 
     const newUser = await db.user.create({
-        data: {
-        email: email,
-        password: hashedPassword, 
-        role: 'ADMIN', 
-        first_name: first_name,
-        last_name: last_name,
-        },
+      data: {
+        email,
+        password: hashedPassword,
+        role: 'ADMIN',
+        first_name,
+        last_name,
+      },
     });
 
-
-    return NextResponse.json({ message: 'Admin user created successfully', user: newUser , status: 201 });
-
-        
-    }
-   catch (error: any) {
+    return NextResponse.json(
+      {
+        message: 'Admin user created successfully',
+        user: newUser,
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
     console.error(error);
-    return NextResponse.json({
-      message: 'Error creating user',
-      error: error.message,
-    }, { status: 500 });
+
+    if (error instanceof HTTPError) {
+      console.log(error)
+      return NextResponse.json(
+        {
+          message: error.message,
+        },
+        { status: error.status }
+      );
+    }
+
+    return NextResponse.json({ message: 'Error creating user', error: error.message }, { status: 500 });
   }
 }
+
