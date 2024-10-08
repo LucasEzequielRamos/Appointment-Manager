@@ -167,6 +167,103 @@ const FormMessage = React.forwardRef<
 });
 FormMessage.displayName = "FormMessage";
 
+type CheckboxProps = {
+  options: { label: string; value: string }[]; // Opciones de checkbox con label y value
+  name: string; // Nombre del campo en el formulario
+};
+
+const CheckboxGroup: React.FC<CheckboxProps> = ({ options, name }) => {
+  return (
+    <FormField
+      name={name}
+      render={({ field, fieldState }) => (
+        <FormItem className="w-full">
+          <FormLabel>Availability</FormLabel>
+          <FormControl>
+            <div className="flex flex-col w-full  space-y-2">
+              {options.map(option => (
+                <label
+                  key={option.value}
+                  className="flex items-center space-x-2 p-2 border rounded-lg transition-colors duration-200 ease-in-out hover:bg-gray-100"
+                >
+                  <input
+                    type="checkbox"
+                    value={option.value}
+                    checked={field.value.includes(option.value)}
+                    onChange={() => {
+                      const newValue = field.value.includes(option.value)
+                        ? field.value.filter(
+                            (val: string) => val !== option.value
+                          )
+                        : [...field.value, option.value];
+                      field.onChange(newValue);
+                    }}
+                    className="form-checkbox h-5 w-5 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-gray-800">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </FormControl>
+          {fieldState.error && (
+            <FormMessage>{fieldState.error.message}</FormMessage>
+          )}
+        </FormItem>
+      )}
+    />
+  );
+};
+
+type TimeSlotProps = {
+  options: { label: string; value: string }[]; // Opciones de tiempo con label y value
+  name: string; // Nombre del campo en el formulario
+};
+
+const TimeSlot: React.FC<TimeSlotProps> = ({ options, name }) => {
+  const { control } = useFormContext();
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <FormItem>
+          <FormLabel>{name}</FormLabel>
+          <FormControl>
+            <div className="flex flex-col">
+              {options.map(option => (
+                <label
+                  key={option.value}
+                  className="flex items-center space-x-2"
+                >
+                  <input
+                    type="checkbox"
+                    value={option.value}
+                    checked={field.value.includes(option.value)}
+                    onChange={() => {
+                      const newValue = field.value.includes(option.value)
+                        ? field.value.filter(
+                            (val: string) => val !== option.value
+                          )
+                        : [...field.value, option.value];
+                      field.onChange(newValue); // Actualiza el valor del campo
+                    }}
+                    className="form-checkbox"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </FormControl>
+          {fieldState.error && (
+            <FormMessage>{fieldState.error.message}</FormMessage>
+          )}
+        </FormItem>
+      )}
+    />
+  );
+};
+
 export {
   useFormField,
   Form,
@@ -176,4 +273,6 @@ export {
   FormDescription,
   FormMessage,
   FormField,
+  CheckboxGroup,
+  TimeSlot,
 };

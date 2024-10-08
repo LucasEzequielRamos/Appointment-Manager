@@ -27,8 +27,10 @@ const LoginForm = () => {
       redirect: false,
     });
     console.log(res);
-    if (res?.error === null) router.push("/home");
-    setError("El mail o la contraseña son incorrectos");
+    if (res?.error !== null) {
+      setError("El mail o la contraseña son incorrectos");
+    }
+    router.push("/home");
   };
 
   return (

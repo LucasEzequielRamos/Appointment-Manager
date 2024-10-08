@@ -15,7 +15,6 @@ import {
 } from "@/Components/ui/form";
 import { Input } from "@/Components/ui/input";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 
 const formSchema = z
   .object({
