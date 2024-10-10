@@ -15,6 +15,8 @@ import {
 } from "@/Components/ui/form";
 import { Input } from "@/Components/ui/input";
 import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@radix-ui/react-toast";
 
 const formSchema = z
   .object({
@@ -62,11 +64,21 @@ export function page() {
         body: JSON.stringify(values),
       });
       const data = await res.json();
-      // TODO: Toast with created successfully and back to home or register another admin
-      console.log(data);
-      if (data.status === 201) router.push("/auth/login");
-    } catch (error) {
-      console.log(error); // TODO: Toast with error
+      if (res.status !== 201) {
+        throw new Error(`Error ${res.status}: ${data.message}`);
+      }
+      toast({
+        title: 'Usuario creado correctamente',
+        variant: 'success',
+        description: `El usuario administrador se ha creado correctamente`,
+        action: <ToastAction onClick={() => router.push('/home')} altText="Volver al inicio">Volver al inicio</ToastAction>
+      }) 
+    } catch (error: any) {
+      toast({
+        title: 'Algo ha salido mal',
+        variant: 'destructive',
+        description: `Hubo un problema con tu respuesta. ${error.message}`,
+      })
     }
   }
 

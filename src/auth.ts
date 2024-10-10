@@ -145,7 +145,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       });
 
-      console.log({dbSessions}, 'db sessions')
 
 
       if(dbSessions && dbSessions.length > 0){
@@ -156,7 +155,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               where: { sessionToken: dbSession.sessionToken },
             });
 
-            console.log({sessionExists}, 'session exists')
             if(sessionExists){
               console.log(dbSession, 'expired')
               await db.session.delete({
@@ -173,7 +171,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: {sessionToken: token.id as string}
         })
 
-        console.log({sessionFound}, 'session found')
         if(!sessionFound){
 
           await db.session.create({
