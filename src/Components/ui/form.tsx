@@ -168,8 +168,8 @@ const FormMessage = React.forwardRef<
 FormMessage.displayName = "FormMessage";
 
 type CheckboxProps = {
-  options: { label: string; value: string }[]; // Opciones de checkbox con label y value
-  name: string; // Nombre del campo en el formulario
+  options: { label: string; value: string }[];
+  name: string;
 };
 
 const CheckboxGroup: React.FC<CheckboxProps> = ({ options, name }) => {
@@ -205,9 +205,6 @@ const CheckboxGroup: React.FC<CheckboxProps> = ({ options, name }) => {
               ))}
             </div>
           </FormControl>
-          {fieldState.error && (
-            <FormMessage>{fieldState.error.message}</FormMessage>
-          )}
         </FormItem>
       )}
     />
