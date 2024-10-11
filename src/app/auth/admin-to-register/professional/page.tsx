@@ -1,10 +1,8 @@
 "use client";
 
-import { Button } from "@/Components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,9 +13,9 @@ import { toast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ToastAction } from "@radix-ui/react-toast";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Checkbox } from "@/Components/ui/checkbox";
 
 const dayAvailability = [
   {
@@ -67,8 +65,8 @@ const formSchema = z
         "La confirmación de la contraseña debe tener al menos 8 caracteres",
     }),
     dayAvailability: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Debes seleccionar al menos un dia.",
-  }),
+      message: "Debes seleccionar al menos un dia.",
+    }),
   })
   .refine(data => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -109,6 +107,8 @@ const page = () => {
     },
   });
 
+  const [availability, setAvailability] = useState<Availability[]>([]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const res = await fetch("/api/register/professional", {
@@ -116,22 +116,46 @@ const page = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify('values'),
+        body: JSON.stringify(values),
       });
       const data = await res.json();
-      if (res.status !== 201 ) {
+      if (res.status !== 201) {
         throw new Error(`Error ${res.status}: ${data.message}`);
-      } 
+      }
       toast({
         title: 'Usuario creado correctamente',
         variant: 'success',
         description: `El usuario administrador se ha creado correctamente`,
         action: <ToastAction onClick={() => router.push('/home')} altText="Volver al inicio">Volver al inicio</ToastAction>
-      }) 
+      })
     } catch (error) {
 
     }
   };
+
+  const changeHandler = (e) => {
+    const { name, checked } = e.target;
+    // form.setValue(name, value);
+    if (checked) {
+      setAvailability((prev) => {
+        const newAvailability = [...prev];
+        const index = newAvailability.findIndex((item) => item.day === name);
+        if (index === -1) {
+          newAvailability.push({ day: name, time_slots: [] });
+        } else {
+          newAvailability[index] = { ...newAvailability[index], time_slots: [] };
+        }
+        return newAvailability;
+      });
+    } else {
+      const newAvailability = availability.filter((item) => item.day !== name);
+      setAvailability(newAvailability);
+    }
+  }
+
+  useEffect(() => {
+    console.log(availability)
+  }, [availability])
 
   return (
     <Form {...form}>
@@ -204,7 +228,7 @@ const page = () => {
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={form.control}
           name="dayAvailability"
           render={() => (
@@ -248,10 +272,32 @@ const page = () => {
                   }}
                 />
               ))}
-              <FormMessage />
+              <FormMessage /> 
             </FormItem>
           )}
-        />
+        /> */}
+
+        {dayAvailability.map(day => {
+          return (
+            <div key={day.id}>
+              <input onChange={changeHandler} type="checkbox" id={day.id + "Availability"} name={day.id} />
+              <label htmlFor={day.id}>{day.label}</label>
+            </div>
+          )
+        })}
+
+        {availability.map(availabilityDay => {
+          return (
+            <div key={availabilityDay.day}>
+              <input type="time" id={availabilityDay.day + "StartTime"}name={availabilityDay.day + "StartTime"} />
+              <label htmlFor={availabilityDay.day + "StartTime"}>{availabilityDay.day} Start Time</label>
+              <input type="time" id={availabilityDay.day + "EndTime"} name={availabilityDay.day + "EndTime"} />
+              <label htmlFor="mondayEndTime">{availabilityDay.day} End Time</label>
+            </div>
+          )
+        })}
+
+
       </form>
     </Form>
   );

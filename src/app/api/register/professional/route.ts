@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import db from '@/lib/db';
-import {  TimeSlot, WeekDay } from '@prisma/client';
+import { TimeSlot, WeekDay } from '@prisma/client';
 
 type DayAvailability = {
   day: WeekDay;            
@@ -11,7 +11,7 @@ type DayAvailability = {
 export async function POST(req: NextRequest) {
   try {
     const { first_name, last_name, email, password, professionalProfile  } = await req.json()
-    console.log(professionalProfile )
+    console.log(professionalProfile)
 
     if (!first_name || !last_name || !email || !password || !professionalProfile ) {
       return NextResponse.json({ error: 'Todos los campos son obligatorios, incluyendo el perfil de cliente.' }, {status:400});
@@ -51,8 +51,6 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-
-    
 
     return NextResponse.json({ message: 'Professional user created successfully', user: newUser }, { status: 201 });
   } catch (error: any) {
