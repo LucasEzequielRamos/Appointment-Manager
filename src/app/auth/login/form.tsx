@@ -1,5 +1,6 @@
 "use client";
 
+import SignInGoogleButton from "@/Components/SigninGoogleButton";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,8 +27,10 @@ const LoginForm = () => {
       redirect: false,
     });
     console.log(res);
-    if (res?.error === null) router.push("/home");
-    setError("El mail o la contraseña son incorrectos");
+    if (res?.error !== null) {
+      setError("El mail o la contraseña son incorrectos");
+    }
+    router.push("/home");
   };
 
   return (
@@ -76,6 +79,7 @@ const LoginForm = () => {
           >
             Iniciar Sesión
           </button>
+          <SignInGoogleButton />
         </form>
         <div className="text-center mt-6">
           <p className="text-gray-600">
