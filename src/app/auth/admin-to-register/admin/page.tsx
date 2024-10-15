@@ -55,30 +55,39 @@ export function page() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("ohla", values);
     try {
-      const res = await fetch("/api/register/admin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-      const data = await res.json();
-      if (res.status !== 201) {
-        throw new Error(`Error ${res.status}: ${data.message}`);
-      }
-      toast({
-        title: 'Usuario creado correctamente',
-        variant: 'success',
-        description: `El usuario administrador se ha creado correctamente`,
-        action: <ToastAction onClick={() => router.push('/home')} altText="Volver al inicio">Volver al inicio</ToastAction>
-      }) 
+      console.log("hola");
+      // const res = await fetch("/api/register/admin", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(values),
+      // });
+      // const data = await res.json();
+      // if (res.status !== 201) {
+      //   throw new Error(`Error ${res.status}: ${data.message}`);
+      // }
+      // toast({
+      //   title: "Usuario creado correctamente",
+      //   variant: "success",
+      //   description: `El usuario administrador se ha creado correctamente`,
+      //   action: (
+      //     <ToastAction
+      //       onClick={() => router.push("/home")}
+      //       altText="Volver al inicio"
+      //     >
+      //       Volver al inicio
+      //     </ToastAction>
+      //   ),
+      // });
     } catch (error: any) {
       toast({
-        title: 'Algo ha salido mal',
-        variant: 'destructive',
+        title: "Algo ha salido mal",
+        variant: "destructive",
         description: `Hubo un problema con tu respuesta. ${error.message}`,
-      })
+      });
     }
   }
 
