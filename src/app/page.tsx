@@ -1,4 +1,3 @@
-import SignInGoogleButton from "@/components/signin-google-button";
 import Link from "next/link";
 
 export default function Home() {

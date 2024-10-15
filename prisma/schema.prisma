@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,19 +11,18 @@ datasource db {
 // Availability types
 
 model DayAvailability {
-  id               Int                  @id @default(autoincrement())
-  day              WeekDay
-  time_slot         TimeSlot?             @relation("DayAvailabilityToTimeSlot")
-  professional     ProfessionalProfile   @relation(fields: [professional_id], references: [professional_id], onDelete: Cascade)
-  professional_id  Int
+  id         Int       @id @default(autoincrement())
+  day        WeekDay
+  time_slot  TimeSlot? @relation("DayAvailabilityToTimeSlot")
+  service    Service   @relation(fields: [service_id], references: [id], onDelete: Cascade)
+  service_id Int
 }
 
 model TimeSlot {
-  id               Int                  @id @default(autoincrement())
+  id                Int             @id @default(autoincrement())
   start_time        String
   end_time          String
-  dayAvailability  DayAvailability       @relation("DayAvailabilityToTimeSlot", fields: [dayAvailabilityId], references: [id], onDelete: Cascade)
-  dayAvailabilityId Int                  @unique
+  dayAvailability   DayAvailability @relation("DayAvailabilityToTimeSlot", fields: [id], references: [id], onDelete: Cascade)
 }
 
 enum WeekDay {
@@ -40,20 +38,17 @@ enum WeekDay {
 // Models
 
 model User {
-  user_id Int @id @default(autoincrement())
-  first_name String? @db.VarChar(255)
-  last_name String? @db.VarChar(255)
-  email String @unique @db.VarChar(255)
+  user_id       Int       @id @default(autoincrement())
+  first_name    String?   @db.VarChar(255)
+  last_name     String?   @db.VarChar(255)
+  email         String    @unique @db.VarChar(255)
   emailVerified DateTime?
-  role Role @default(CLIENT)
-  password String? 
-  createdAt DateTime @default(now())
-  updatedAt DateTime? @updatedAt
+  role          Role      @default(CLIENT)
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
 
-  clientAppointments Appointment[] @relation("ClientAppointments")
-  professionalAppointments Appointment[] @relation("ProfessionalAppointments")
-
-  client ClientProfile?
+  client       ClientProfile?
   professional ProfessionalProfile?
 
   accounts      Account[]
@@ -69,47 +64,55 @@ enum Role {
 
 // Specific to client
 model ClientProfile {
-  client_id Int @unique 
-  address String @db.VarChar(255)
-  phone String @db.VarChar(255)
-  coverage String
-  user User @relation(fields: [client_id], references: [user_id], onDelete: Cascade)
+  client_id          Int           @unique
+  address            String        @db.VarChar(255)
+  phone              String        @db.VarChar(255)
+  coverage           String
+  user               User          @relation(fields: [client_id], references: [user_id], onDelete: Cascade)
+  clientAppointments Appointment[] @relation("ClientAppointments")
 }
 
 // Specific to professional
 model ProfessionalProfile {
-  professional_id Int @unique
-  availability DayAvailability[]
-  user User @relation(fields: [professional_id], references: [user_id], onDelete: Cascade)
+  professional_id          Int           @unique
+  user                     User          @relation(fields: [professional_id], references: [user_id], onDelete: Cascade)
+  services                 Service[]
+  professionalAppointments Appointment[] @relation("ProfessionalAppointments")
 }
 
 model Service {
-  id Int @id @default(autoincrement())
-  name String @unique @db.VarChar(255)
-  duration String @db.VarChar(255)
-  coverage String? @db.VarChar(255)
-  appointments Appointment[]
+  id              Int                 @id @default(autoincrement())
+  name            String              @unique @db.VarChar(255)
+  availability    DayAvailability[]
+  duration        String              @db.VarChar(255)
+  coverage        String?             @db.VarChar(255)
+  appointments    Appointment[]
+  professional_id Int
+  professional    ProfessionalProfile @relation(fields: [professional_id], references: [professional_id], onDelete: Cascade)
 }
 
 model Appointment {
-  id Int @id @default(autoincrement())
-  created_at DateTime  @default(now()) @db.Timestamp(0)
-  appointment_date DateTime @db.Timestamp(0)
-  coverage String? @db.VarChar(255)
+  id               Int       @id @default(autoincrement())
+  created_at       DateTime  @default(now()) @db.Timestamp(0)
+  delivered_at     DateTime? @db.Timestamp(0)
+  appointment_date DateTime  @db.Timestamp(0)
+  coverage         String?   @db.VarChar(255)
+  available        Boolean   @default(true)
+  cancelled        Boolean   @default(false)
+  cancelled_reason String?
 
   service_id Int
-  service Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
+  service    Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
 
-  client_id Int
-  client User @relation("ClientAppointments", fields: [client_id], references: [user_id], onDelete: Cascade)
+  client_id Int?
+  client    ClientProfile? @relation("ClientAppointments", fields: [client_id], references: [client_id], onDelete: Cascade)
 
   professional_id Int
-  professional User @relation("ProfessionalAppointments", fields: [professional_id], references: [user_id], onDelete: Cascade)
+  professional    ProfessionalProfile @relation("ProfessionalAppointments", fields: [professional_id], references: [professional_id], onDelete: Cascade)
 }
 
-
 model Account {
-  user_id            Int
+  user_id           Int
   type              String
   provider          String
   providerAccountId String
@@ -127,38 +130,38 @@ model Account {
   user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
-  }
- 
+}
+
 model Session {
-  sessionToken String @unique @id
-  user_id       Int
+  sessionToken String   @id @unique
+  user_id      Int
   expires      DateTime
   user         User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }
- 
+
 // Optional for WebAuthn support
 model Authenticator {
-  credentialID String  @unique
-  user_id Int
-  providerAccountId String
-  credentialPublicKey String
-  counter Int
+  credentialID         String  @unique
+  user_id              Int
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
   credentialDeviceType String
-  credentialBackedUp Boolean
-  transports String?
- 
+  credentialBackedUp   Boolean
+  transports           String?
+
   user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
- 
+
   @@id([user_id, credentialID])
 }

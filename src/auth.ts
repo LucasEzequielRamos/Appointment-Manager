@@ -145,8 +145,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       });
 
-
-
       if(dbSessions && dbSessions.length > 0){
         for (const dbSession of dbSessions) {
           if (new Date() > dbSession.expires) {

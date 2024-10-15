@@ -43,9 +43,10 @@ export async function POST(req: NextRequest) {
               create: availability.map((availability: DayAvailability) => ({
                 day: availability.day,
                 time_slot: {
-                    start_time: availability.time_slot.start_time,
-                    end_time: availability.time_slot.end_time,
-              
+                    create: {
+                      start_time: availability.time_slot.start_time,
+                      end_time: availability.time_slot.end_time,
+                    }
                 },
               })),
             },

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Toaster } from "@/Components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,12 +12,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html data-theme='mytheme' lang="en">
       <body
        
       >
         {children}
-        <Toaster/>
       </body>
     </html>
   );

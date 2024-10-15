@@ -16,7 +16,7 @@ export async function GET (req: NextRequest) {
           include:{
             availability:{
               include:{
-                timeSlots: true
+                time_slot: true
               }
             }
           }

@@ -1,29 +1,8 @@
 "use client";
 
-import { toast } from "@/hooks/use-toast";
-import { ToastAction } from "@radix-ui/react-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-interface TimeSlot {
-  start_time: string;
-  end_time: string;
-}
-
-interface Availability {
-  day: string;
-  time_slot: TimeSlot;
-}
-
-const dayAvailability = [
-  { id: "monday", label: "Lunes" },
-  { id: "tuesday", label: "Martes" },
-  { id: "wednesday", label: "Miércoles" },
-  { id: "thursday", label: "Jueves" },
-  { id: "friday", label: "Viernes" },
-  { id: "saturday", label: "Sábado" },
-  { id: "sunday", label: "Domingo" },
-];
 
 const Page = () => {
   const router = useRouter();
@@ -41,14 +20,12 @@ const Page = () => {
     confirmPassword: "",
   });
 
-  const [availability, setAvailability] = useState<Availability[]>([]);
   const [errors, setErrors] = useState<{
     first_name?: string;
     last_name?: string;
     email?: string;
     password?: string;
     confirmPassword?: string;
-    availability?: string;
   }>({});
 
   const validateForm = () => {
@@ -75,19 +52,7 @@ const Page = () => {
       newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
-    if (availability.length === 0) {
-      newErrors.availability = "Debes seleccionar al menos un día.";
-    } else if (availability) {
-      let tsFull = true;
-      availability.forEach(ts => {
-        if (ts.time_slot.start_time === "") tsFull = false;
-        if (ts.time_slot.end_time === "") tsFull = false;
-      });
-      console.log(tsFull);
-      if (!tsFull) {
-        newErrors.availability = "Horarios mal seleccionados";
-      }
-    }
+    
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -101,78 +66,44 @@ const Page = () => {
     }
 
     try {
-      const updatedValues = {
-        ...formData,
-        availability,
-      };
-      console.log("Valores enviados:", updatedValues);
+      const values = {
+        ...formData};
+      console.log("Valores enviados:", values);
 
       const res = await fetch("/api/register/professional", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedValues),
+        body: JSON.stringify(values),
       });
 
-      toast({
-        title: "Usuario creado correctamente",
-        variant: "success",
-        description: `El usuario administrador se ha creado correctamente`,
-        action: (
-          <ToastAction
-            onClick={() => router.push("/home")}
-            altText="Volver al inicio"
-          >
-            Volver al inicio
-          </ToastAction>
-        ),
-      });
+      const data = await res.json();
+      if (res.status !== 201) {
+        throw new Error(`Error ${res.status}: ${data.message}`);
+      }
+
+      console.log(data)
+
+      // toast({
+      //   title: "Usuario creado correctamente",
+      //   variant: "success",
+      //   description: `El usuario administrador se ha creado correctamente`,
+      //   action: (
+      //     <ToastAction
+      //       onClick={() => router.push("/home")}
+      //       altText="Volver al inicio"
+      //     >
+      //       Volver al inicio
+      //     </ToastAction>
+      //   ),
+      // });
     } catch (error) {
       console.log("Error al enviar el formulario:", error);
     }
   };
 
-  const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    const nameToSend = name.charAt(0).toUpperCase() + name.slice(1);
-    console.log(name.charAt(0).toUpperCase() + name.slice(1));
-
-    if (checked) {
-      setAvailability(prev => [
-        ...prev,
-        { day: nameToSend, time_slot: { start_time: "", end_time: "" } },
-      ]);
-    } else {
-      setAvailability(prev => prev.filter(item => item.day !== name));
-    }
-  };
-
-  const handleChangeTimeSlots = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    day: string
-  ) => {
-    const { id, value } = e.target;
-    const isStart = id.includes("StartTime");
-
-    setAvailability(prevAvailability =>
-      prevAvailability.map(availabilityDay => {
-        if (availabilityDay.day === day) {
-          return {
-            ...availabilityDay,
-            time_slot: {
-              ...availabilityDay.time_slot,
-              start_time: isStart
-                ? value
-                : availabilityDay.time_slot.start_time,
-              end_time: !isStart ? value : availabilityDay.time_slot.end_time,
-            },
-          };
-        }
-        return availabilityDay;
-      })
-    );
-  };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-800 text-black">
@@ -250,56 +181,7 @@ const Page = () => {
             )}
           </div>
 
-          <div className="my-4">
-            <h3 className="text-lg font-semibold">Disponibilidad</h3>
-            {dayAvailability.map(day => (
-              <div key={day.id} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={day.id + "Availability"}
-                  name={day.id}
-                  onChange={changeHandler}
-                  className="mr-2"
-                />
-                <label htmlFor={day.id}>{day.label}</label>
-              </div>
-            ))}
-            {errors.availability && (
-              <p className="text-red-700">{errors.availability}</p>
-            )}
-          </div>
-
-          {availability.map(availabilityDay => (
-            <div
-              key={availabilityDay.day}
-              className="flex items-center space-x-4 mb-4"
-            >
-              <input
-                type="time"
-                id={availabilityDay.day + "StartTime"}
-                onChange={e => handleChangeTimeSlots(e, availabilityDay.day)}
-                className="border border-gray-300 rounded"
-              />
-              <label
-                htmlFor={availabilityDay.day + "StartTime"}
-                className="block text-sm font-medium"
-              >
-                {availabilityDay.day} Start Time
-              </label>
-              <input
-                type="time"
-                id={availabilityDay.day + "EndTime"}
-                onChange={e => handleChangeTimeSlots(e, availabilityDay.day)}
-                className="border border-gray-300 rounded"
-              />
-              <label
-                htmlFor={availabilityDay.day + "EndTime"}
-                className="block text-sm font-medium"
-              >
-                {availabilityDay.day} End Time
-              </label>
-            </div>
-          ))}
+          
 
           <button
             type="submit"
