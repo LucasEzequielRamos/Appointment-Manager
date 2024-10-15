@@ -12,19 +12,19 @@ datasource db {
 // Availability types
 
 model DayAvailability {
-  id Int @id @default(autoincrement())
-  day WeekDay
-  timeSlots TimeSlot[]
-  professional ProfessionalProfile @relation(fields: [professional_id], references: [professional_id], onDelete: Cascade)
-  professional_id Int
+  id               Int                  @id @default(autoincrement())
+  day              WeekDay
+  time_slot         TimeSlot?             @relation("DayAvailabilityToTimeSlot")
+  professional     ProfessionalProfile   @relation(fields: [professional_id], references: [professional_id], onDelete: Cascade)
+  professional_id  Int
 }
 
 model TimeSlot {
-  id Int @id @default(autoincrement())
-  startTime String 
-  endTime String
-  dayAvailability DayAvailability @relation(fields: [dayAvailabilityId], references: [id], onDelete: Cascade)
-  dayAvailabilityId Int
+  id               Int                  @id @default(autoincrement())
+  start_time        String
+  end_time          String
+  dayAvailability  DayAvailability       @relation("DayAvailabilityToTimeSlot", fields: [dayAvailabilityId], references: [id], onDelete: Cascade)
+  dayAvailabilityId Int                  @unique
 }
 
 enum WeekDay {
@@ -46,7 +46,7 @@ model User {
   email String @unique @db.VarChar(255)
   emailVerified DateTime?
   role Role @default(CLIENT)
-  password String 
+  password String? 
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
 
@@ -130,7 +130,7 @@ model Account {
   }
  
 model Session {
-  sessionToken String   @unique
+  sessionToken String @unique @id
   user_id       Int
   expires      DateTime
   user         User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)

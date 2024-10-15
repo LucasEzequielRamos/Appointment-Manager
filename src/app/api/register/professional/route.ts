@@ -1,29 +1,32 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import db from '@/lib/db';
-import {  TimeSlot, WeekDay } from '@prisma/client';
+import { TimeSlot, WeekDay } from '@prisma/client';
 
 type DayAvailability = {
   day: WeekDay;            
-  timeSlots: TimeSlot[];  
+  time_slot: TimeSlot;  
 };
+
+
 
 export async function POST(req: NextRequest) {
   try {
-    const { first_name, last_name, email, password, professionalProfile  } = await req.json()
-    console.log(professionalProfile )
+    const { first_name, last_name, email, password, confirmPassword, availability  } = await req.json()
 
-    if (!first_name || !last_name || !email || !password || !professionalProfile ) {
-      return NextResponse.json({ error: 'Todos los campos son obligatorios, incluyendo el perfil de cliente.' }, {status:400});
+    if (!first_name || !last_name || !email || !password || !confirmPassword || !availability ) {
+      return NextResponse.json({ error: 'Todos los campos son obligatorios, incluyendo el perfil de profesional.' }, {status:400});
     }
 
     const userFound = await db.user.findUnique({
       where: { email: email },
     });
 
+    console.log(userFound)
     if (userFound) {
       return NextResponse.json({ message: 'User already exists' }, { status: 400 });
     }
+
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -37,13 +40,12 @@ export async function POST(req: NextRequest) {
         professional: {
           create: {
             availability: {
-              create: professionalProfile.availability.map((availability: DayAvailability) => ({
+              create: availability.map((availability: DayAvailability) => ({
                 day: availability.day,
-                timeSlots: {
-                  create: availability.timeSlots.map((slot: TimeSlot) => ({
-                    startTime: slot.startTime,
-                    endTime: slot.endTime,
-                  })),
+                time_slot: {
+                    start_time: availability.time_slot.start_time,
+                    end_time: availability.time_slot.end_time,
+              
                 },
               })),
             },
@@ -51,10 +53,9 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+    console.log(newUser)
 
-    
-
-    return NextResponse.json({ message: 'Professional user created successfully', user: newUser }, { status: 201 });
+    return NextResponse.json({ message: 'Professional user created successfully', user: email }, { status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
