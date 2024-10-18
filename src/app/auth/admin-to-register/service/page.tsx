@@ -60,19 +60,14 @@ const page = () => {
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
-    if (!formData.name || formData.name.length < 2) {
-      newErrors.name = "El nombre debe contener al menos 2 caracteres.";
-    }
-
     if (availability.length === 0) {
       newErrors.availability = "Debes seleccionar al menos un día.";
-    } else if (availability) {
-      let tsFull = true;
+    } else if (availability.length >= 1) {
+      let tsFull = true; // Time Slot Full
       availability.forEach(ts => {
         if (ts.time_slot.start_time === "") tsFull = false;
         if (ts.time_slot.end_time === "") tsFull = false;
-      });
-      console.log(tsFull);
+      })
       if (!tsFull) {
         newErrors.availability = "Horarios mal seleccionados";
       }
@@ -84,13 +79,11 @@ const page = () => {
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    const nameToSend = name.charAt(0).toUpperCase() + name.slice(1);
-    console.log(name.charAt(0).toUpperCase() + name.slice(1));
 
     if (checked) {
       setAvailability(prev => [
         ...prev,
-        { day: nameToSend, time_slot: { start_time: "", end_time: "" } },
+        { day: name, time_slot: { start_time: "", end_time: "" } },
       ]);
     } else {
       setAvailability(prev => prev.filter(item => item.day !== name));
@@ -132,8 +125,7 @@ const page = () => {
 
     try {
       const values = {
-        ...formData,
-        availability,
+        availability
       };
       console.log("Valores enviados:", values);
 
@@ -228,6 +220,7 @@ const page = () => {
 
       {availability.map(availabilityDay => (
         <>
+        {console.log(availabilityDay)}
           <h4>{availabilityDay.day}</h4>
           <div key={availabilityDay.day} className="flex space-x-4 gap-5 mb-4">
             <div className="flex flex-col">
