@@ -22,7 +22,8 @@ model TimeSlot {
   id                Int             @id @default(autoincrement())
   start_time        String
   end_time          String
-  dayAvailability   DayAvailability @relation("DayAvailabilityToTimeSlot", fields: [id], references: [id], onDelete: Cascade)
+  day_availability   DayAvailability? @relation("DayAvailabilityToTimeSlot", fields: [day_availability_id], references: [id], onDelete: Cascade)
+  day_availability_id Int? @unique
 }
 
 enum WeekDay {
@@ -42,11 +43,11 @@ model User {
   first_name    String?   @db.VarChar(255)
   last_name     String?   @db.VarChar(255)
   email         String    @unique @db.VarChar(255)
-  emailVerified DateTime?
+  email_verified DateTime?
   role          Role      @default(CLIENT)
   password      String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime? @updatedAt
+  created_at     DateTime  @default(now())
+  updated_at     DateTime? @updatedAt
 
   client       ClientProfile?
   professional ProfessionalProfile?
@@ -69,7 +70,7 @@ model ClientProfile {
   phone              String        @db.VarChar(255)
   coverage           String
   user               User          @relation(fields: [client_id], references: [user_id], onDelete: Cascade)
-  clientAppointments Appointment[] @relation("ClientAppointments")
+  client_appointments Appointment[] @relation("ClientAppointments")
 }
 
 // Specific to professional
@@ -77,7 +78,7 @@ model ProfessionalProfile {
   professional_id          Int           @unique
   user                     User          @relation(fields: [professional_id], references: [user_id], onDelete: Cascade)
   services                 Service[]
-  professionalAppointments Appointment[] @relation("ProfessionalAppointments")
+  professionalppointments Appointment[] @relation("ProfessionalAppointments")
 }
 
 model Service {

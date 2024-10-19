@@ -14,9 +14,13 @@ export async function GET (req: NextRequest) {
         client:true,
         professional:{
           include:{
-            availability:{
+            services:{
               include:{
-                time_slot: true
+                availability:{
+                  include:{
+                    time_slot: true
+                  }
+                }
               }
             }
           }

@@ -11,7 +11,7 @@ interface Availability {
   time_slot: TimeSlot;
 }
 
-const dayAvailability = [
+const arrDays = [
   { id: "Monday", label: "Lunes" },
   { id: "Tuesday", label: "Martes" },
   { id: "Wednesday", label: "Miércoles" },
@@ -20,6 +20,15 @@ const dayAvailability = [
   { id: "Saturday", label: "Sábado" },
   { id: "Sunday", label: "Domingo" },
 ];
+
+const hoursToMinutes = (hourString: string) => {
+  const [hours, minutes] = hourString.split(":").map(Number); // Convierte ambas partes en números
+
+  // Convertir las horas a minutos y sumar los minutos
+  const totalMinutes = hours * 60 + minutes;
+
+  return totalMinutes;
+};
 const page = () => {
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [formData, setFormData] = useState<{
@@ -60,14 +69,48 @@ const page = () => {
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailPattern.test(formData.email)) {
+      newErrors.email = "Email inválido";
+    }
+
+    if (!formData.name) {
+      newErrors.name = "Debe seleccionar un servicio";
+    }
+
+    if (!formData.coverage) {
+      newErrors.coverage = "Debe seleccionar una cobertura";
+    }
+
+    if (!formData.duration) {
+      newErrors.duration = "Debe marcar una duracion del servicio";
+    }
+
     if (availability.length === 0) {
       newErrors.availability = "Debes seleccionar al menos un día.";
     } else if (availability.length >= 1) {
       let tsFull = true; // Time Slot Full
+      let totalTime = 0;
       availability.forEach(ts => {
-        if (ts.time_slot.start_time === "") tsFull = false;
-        if (ts.time_slot.end_time === "") tsFull = false;
-      })
+        if (ts.time_slot.start_time === "") {
+          tsFull = false;
+          return;
+        }
+        if (ts.time_slot.end_time === "") {
+          tsFull = false;
+          console.log("hola");
+          return;
+        }
+
+        totalTime =
+          hoursToMinutes(ts.time_slot.end_time) -
+          hoursToMinutes(ts.time_slot.start_time);
+        if (Number(formData.duration) > totalTime) {
+          console.log(totalTime, Number(formData.duration));
+          newErrors.availability =
+            "El horario es mas corto que la duracion del servicio";
+        }
+      });
       if (!tsFull) {
         newErrors.availability = "Horarios mal seleccionados";
       }
@@ -119,30 +162,31 @@ const page = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // if (!validateForm()) {
-    //   return;
-    // }
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       const values = {
-        availability
+        ...formData,
+        availability,
       };
       console.log("Valores enviados:", values);
 
-      // const res = await fetch("/api/register/professional", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(values),
-      // });
+      const res = await fetch("/api/service", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
-      // const data = await res.json();
-      // if (res.status !== 201) {
-      //   throw new Error(`Error ${res.status}: ${data.message}`);
-      // }
+      const data = await res.json();
+      if (res.status !== 201) {
+        throw new Error(`Error ${res.status}: ${data.message}`);
+      }
 
-      // console.log(data)
+      console.log(data);
     } catch (error) {
       console.log("Error al enviar el formulario:", error);
     }
@@ -167,39 +211,72 @@ const page = () => {
         />
         {errors.email && <p className="text-red-700">{errors.email}</p>}
       </div>
-      <label className="label">Seleccione un servicio</label>
-      <select
-        onChange={e => {
-          setFormData({ ...formData, name: e.target.value });
-        }}
-        className="select w-full max-w-xs"
-      >
-        <option>Servicio 1</option>
-        <option>Servicio 2</option>
-        <option>Servicio 3</option>
-        <option>Servicio 4</option>
-      </select>
+      <div className="flex flex-col">
+        <label className="label">Seleccione un servicio</label>
+        <select
+          onChange={e => {
+            setFormData({ ...formData, name: e.target.value });
+          }}
+          className="select w-full max-w-xs select-bordered"
+        >
+          <option>Servicio 1</option>
+          <option>Servicio 2</option>
+          <option>Servicio 3</option>
+          <option>Servicio 4</option>
+        </select>
+        {errors.name && <p className="text-red-700">{errors.name}</p>}
+      </div>
 
-      <label htmlFor="duration" className="label">
-        Duracion del servicio
-      </label>
-      <div className="">
-        <input
-          name="duration"
-          className="input input-bordered"
-          type="number"
+      <div className="flex flex-col">
+        <label className="label">Seleccione una cobertura</label>
+        <select
+          onChange={e => {
+            setFormData({ ...formData, coverage: e.target.value });
+          }}
+          className="select w-full max-w-xs select-bordered"
+        >
+          <option>Sin cobertura</option>
+          <option>Bronce</option>
+          <option>Plata</option>
+          <option>Oro</option>
+        </select>
+        {errors.coverage && <p className="text-red-700">{errors.coverage}</p>}
+      </div>
+
+      <div className="flex flex-col">
+        <label htmlFor="duration" className="label">
+          Duracion del servicio
+        </label>
+        <select
+          id="timeFragmentSelect"
+          className="select select-bordered w-full max-w-xs"
           onChange={e => {
             setFormData({
               ...formData,
               duration: e.target.value.toString(),
             });
           }}
-        />
-        <span className="">mins</span>
+        >
+          <option value="">Seleccione un tiempo</option>
+          <option value="15">15 min</option>
+          <option value="30">30 min</option>
+          <option value="45">45 min</option>
+          <option value="60">1 hora</option>
+          <option value="75">1 hora 15 min</option>
+          <option value="90">1 hora 30 min</option>
+          <option value="105">1 hora 45 min</option>
+          <option value="120">2 horas</option>
+          <option value="135">2 horas 15 min</option>
+          <option value="150">2 horas 30 min</option>
+          <option value="165">2 horas 45 min</option>
+          <option value="180">3 horas</option>
+        </select>
+        {errors.duration && <p className="text-red-700">{errors.duration}</p>}
       </div>
+
       <div className="my-4">
         <h3 className="text-lg font-semibold">Disponibilidad</h3>
-        {dayAvailability.map(day => (
+        {arrDays.map(day => (
           <div key={day.id} className="flex items-center">
             <input
               type="checkbox"
@@ -219,10 +296,9 @@ const page = () => {
       </div>
 
       {availability.map(availabilityDay => (
-        <>
-        {console.log(availabilityDay)}
+        <div key={availabilityDay.day}>
           <h4>{availabilityDay.day}</h4>
-          <div key={availabilityDay.day} className="flex space-x-4 gap-5 mb-4">
+          <div className="flex space-x-4 gap-5 mb-4">
             <div className="flex flex-col">
               <label
                 htmlFor={availabilityDay.day + "StartTime"}
@@ -252,7 +328,7 @@ const page = () => {
               />
             </div>
           </div>
-        </>
+        </div>
       ))}
       <button type="submit">Enviar</button>
     </form>
