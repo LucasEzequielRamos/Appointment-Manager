@@ -21,11 +21,10 @@ export async function POST(req: NextRequest) {
     const userFound = await db.user.findUnique({
       where: { email: email },
     });
-
-    console.log(userFound)
    
-
-
+    if(!userFound || userFound.role !== 'PROFESSIONAL'){
+        return NextResponse.json({ error: 'No existe un usuario profesional con ese correo electronico', status:400})
+    }
 
     const newService = await db.service.create({
         data: {
@@ -41,7 +40,6 @@ export async function POST(req: NextRequest) {
           },
         }
       });
-    console.log(newService)
 
 
     return NextResponse.json({ message: 'Service added created successfully', user: userFound }, { status: 201 });
