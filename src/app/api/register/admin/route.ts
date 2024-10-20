@@ -7,7 +7,6 @@ import HTTPError from '@/utils/HTTPError';
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    console.log({ session });
 
     if (!session) {
       throw new HTTPError('Session does not exist', 401);
@@ -19,7 +18,6 @@ export async function POST(req: Request) {
 
     const { first_name, last_name, email, password, confirmPassword } = await req.json();
 
-    console.log({ email });
     if (!email) {
       throw new HTTPError('El email es obligatorio.', 400);
     }

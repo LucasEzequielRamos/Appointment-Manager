@@ -186,7 +186,18 @@ const page = () => {
         throw new Error(`Error ${res.status}: ${data.message}`);
       }
 
-      console.log(data);
+      setFormData({
+        email: "",
+        name: "",
+        availability: [
+          {
+            day: "",
+            time_slot: { start_time: "", end_time: "" },
+          },
+        ],
+        duration: "",
+        coverage: "",
+      });
     } catch (error) {
       console.log("Error al enviar el formulario:", error);
     }

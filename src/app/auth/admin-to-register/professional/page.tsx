@@ -1,11 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-
 const Page = () => {
-  const router = useRouter();
   const [formData, setFormData] = useState<{
     first_name: string;
     last_name: string;
@@ -52,8 +49,6 @@ const Page = () => {
       newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
-    
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -67,7 +62,8 @@ const Page = () => {
 
     try {
       const values = {
-        ...formData};
+        ...formData,
+      };
       console.log("Valores enviados:", values);
 
       const res = await fetch("/api/register/professional", {
@@ -83,27 +79,17 @@ const Page = () => {
         throw new Error(`Error ${res.status}: ${data.message}`);
       }
 
-      console.log(data)
-
-      // toast({
-      //   title: "Usuario creado correctamente",
-      //   variant: "success",
-      //   description: `El usuario administrador se ha creado correctamente`,
-      //   action: (
-      //     <ToastAction
-      //       onClick={() => router.push("/home")}
-      //       altText="Volver al inicio"
-      //     >
-      //       Volver al inicio
-      //     </ToastAction>
-      //   ),
-      // });
+      setFormData({
+        first_name: "",
+        last_name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
     } catch (error) {
       console.log("Error al enviar el formulario:", error);
     }
   };
-
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-800 text-black">
@@ -180,8 +166,6 @@ const Page = () => {
               <p className="text-red-700">{errors.confirmPassword}</p>
             )}
           </div>
-
-          
 
           <button
             type="submit"
