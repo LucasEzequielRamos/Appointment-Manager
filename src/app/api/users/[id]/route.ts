@@ -1,10 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db'
 
-export async function GET (req: NextRequest) {
+export async function GET (req: NextRequest, {params}: {params:{id: number}}) {
   try {
+    const user_id = params.id
+    
+    if(!user_id) return 
 
-    const usersFound = await db.user.findMany({
+    const userFound = await db.user.findUnique({        
+      where: { user_id: Number(user_id)},
       include: {
         client:true,
         professional:{
@@ -23,14 +27,14 @@ export async function GET (req: NextRequest) {
       }
     });
 
-    // console.log(usersFound)
 
-    if (!usersFound) {
+
+    if (!userFound) {
       return NextResponse.json({ message: 'User not found' }, { status: 400 });
     }
    
 
-    return NextResponse.json({ message: 'User found successfully', user: usersFound }, { status: 201 });
+    return NextResponse.json({ message: 'User found successfully', user: userFound }, { status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({

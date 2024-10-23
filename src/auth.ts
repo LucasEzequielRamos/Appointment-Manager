@@ -182,7 +182,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       
         session.user={
           ...session.user,
-          id: token.jti as string,
+          id: token.user_id as string,
           name: token.name as string,
           email: token.email  as string,
           last_name: token.lastName  as string,
