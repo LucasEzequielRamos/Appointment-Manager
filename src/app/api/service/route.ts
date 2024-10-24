@@ -42,7 +42,33 @@ export async function POST(req: NextRequest) {
       });
 
 
-    return NextResponse.json({ message: 'Service added created successfully', user: userFound }, { status: 201 });
+    return NextResponse.json({ message: 'Service added created successfully', user: newService }, { status: 201 });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({
+      message: 'Error creating professional user',
+      error: error.message,
+    }, { status: 500 });
+  }
+}
+export async function GET(req: NextRequest) {
+  try {
+
+    const servicesFound = await db.service.findMany({
+      
+        include:{
+          
+          availability:{
+            include:{
+              time_slot: true
+            }
+          },
+          
+        }
+        
+      });
+
+    return NextResponse.json({ message: 'Service added created successfully', user: servicesFound }, { status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({

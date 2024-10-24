@@ -1,5 +1,7 @@
 import { getAllUsers, getUserById } from "@/utils/getUser";
-import AdminDashboard from "@/Components/AdminDashboard";
+import AdminDashboard from "@/Components/Dashboards/AdminDashboard";
+import ClientDashboard from "@/Components/Dashboards/ClientDashboard";
+import ProfessionalDashboard from "@/Components/Dashboards/ProfessionalDashboard";
 
 const page = async ({ params }: { params: { id: number } }) => {
   const user = await getUserById(params.id);
@@ -21,7 +23,13 @@ const page = async ({ params }: { params: { id: number } }) => {
     professionals: [],
   };
 
-  return <AdminDashboard {...props} />;
+  return user.role === "ADMIN" ? (
+    <AdminDashboard {...props} />
+  ) : user.role === "CLIENT" ? (
+    <ClientDashboard {...props} />
+  ) : (
+    <ProfessionalDashboard {...props} />
+  );
 };
 
 export default page;

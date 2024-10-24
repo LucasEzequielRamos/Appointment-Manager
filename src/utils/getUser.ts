@@ -6,7 +6,7 @@ export async function getUserById (id: number): Promise<any> {
     
 
     if (userData !== undefined) {
-      const res = await fetch(`${process.env.NEXTAUTH_URL}api/users/${id}`, {
+      const res = await fetch(`${process.env.NEXTAUTH_URL}api/user/${id}`, {
         method: 'GET'
       })
 
@@ -27,7 +27,7 @@ export async function getAllUsers (): Promise<any> {
     
 
     if (userData !== undefined) {
-      const res = await fetch(`${process.env.NEXTAUTH_URL}api/users`, {
+      const res = await fetch(`${process.env.NEXTAUTH_URL}api/user`, {
         method: 'GET'
       })
 

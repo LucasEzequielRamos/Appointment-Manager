@@ -12,9 +12,11 @@ type DayAvailability = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { first_name, last_name, email, password, confirmPassword } = await req.json()
+    const { first_name, last_name, email, password, confirm_password } = await req.json()
 
-    if (!first_name || !last_name || !email || !password || !confirmPassword  ) {
+    console.log(first_name, last_name, email, password, confirm_password)
+
+    if (!first_name || !last_name || !email || !password || !confirm_password  ) {
       return NextResponse.json({ error: 'Todos los campos son obligatorios, incluyendo el perfil de profesional.' }, {status:400});
     }
 

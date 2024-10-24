@@ -1,12 +1,12 @@
 "use client";
 
-import SignInGoogleButton from "@/Components/SigninGoogleButton";
+import SignInGoogleButton from "@/Components/Buttons/SigninGoogleButton";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const LoginForm = () => {
+const LoginUserForm = () => {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -15,7 +15,6 @@ const LoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí puedes manejar el login usando la lógica de NextAuth o tu API
     if (!email || !password) {
       setError("Por favor completa todos los campos");
       return;
@@ -97,4 +96,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default LoginUserForm;

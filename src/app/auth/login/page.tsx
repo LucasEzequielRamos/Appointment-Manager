@@ -1,7 +1,7 @@
 import React from "react";
-import LoginForm from "./form";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import LoginUserForm from "@/Components/Forms/LoginUserForm";
 
 const page = async () => {
   const session = await auth();
@@ -9,7 +9,7 @@ const page = async () => {
   if (session) redirect("/home");
   return (
     <div>
-      <LoginForm />
+      <LoginUserForm />
     </div>
   );
 };

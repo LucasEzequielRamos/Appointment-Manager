@@ -28,6 +28,7 @@ const AdminDashboard = ({
 
       <div className="flex flex-col [&>a]:p-2">
         <h3 className="font-bold">Acciones administrativas:</h3>
+        <Link href={`/auth/register`}>Registrar Cliente</Link>
         <Link href={`/auth/admin-to-register/professional`}>
           Registrar Profesional
         </Link>

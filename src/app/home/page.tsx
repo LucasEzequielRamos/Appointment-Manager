@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import LogoutButton from "@/Components/LogoutButton";
+import LogoutButton from "@/Components/Buttons/LogoutButton";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 

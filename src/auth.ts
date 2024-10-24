@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { comparePassword } from "@/utils/password";
+import { comparePassword } from "@/utils/helpers";
 import db from "@/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Google from "next-auth/providers/google";
@@ -135,7 +135,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.email = user.email;
         token.role = user.role;
       }
-      if(token) return token;
+      if(token) return {...token, id:token.jti};
     },
     async session({ session, token }): Promise<any> {
       if(!token) return null
@@ -144,6 +144,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user_id: token.user_id as number,
         },
       });
+
 
       if(dbSessions && dbSessions.length > 0){
         for (const dbSession of dbSessions) {
@@ -163,14 +164,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         }
       }
-      
      
         const sessionFound = await db.session.findUnique({
           where: {sessionToken: token.id as string}
         })
 
-        if(!sessionFound){
 
+        if(!sessionFound){
           await db.session.create({
             data: {
               user_id: token.user_id  as number,
