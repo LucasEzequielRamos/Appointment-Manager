@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db'
-import { saltAndHashPassword } from "@/utils/password"
+import { saltAndHashPassword } from "@/utils/helpers"
 import { auth } from '@/auth'
 import HTTPError from '@/utils/HTTPError';
 
@@ -16,27 +16,31 @@ export async function POST(req: Request) {
       throw new HTTPError('Unauthorized, you don’t have permission', 401);
     }
 
-    const { first_name, last_name, email, password, confirmPassword } = await req.json();
+    const { first_name, last_name, email, password } = await req.json();
 
-    if (!email) {
-      throw new HTTPError('El email es obligatorio.', 400);
-    }
+    // if (!email) {
+    //   throw new HTTPError('El email es obligatorio.', 400);
+    // }
 
     const userFound = await db.user.findUnique({
       where: { email },
     });
 
     if (userFound) {
-      throw new HTTPError('Usuario ya existente', 400);
+      return NextResponse.json({ message: 'User already exists', status: 400 });
     }
 
-    if (password !== confirmPassword) {
-      throw new HTTPError('Las contraseñas no coinciden', 400);
-    }
+    // if (userFound) {
+    //   throw new HTTPError('Usuario ya existente', 400);
+    // }
 
-    if (!first_name || !last_name || !password || !confirmPassword) {
-      throw new HTTPError('Todos los campos son obligatorios', 400);
-    }
+    // if (password !== confirmPassword) {
+    //   throw new HTTPError('Las contraseñas no coinciden', 400);
+    // }
+
+    // if (!first_name || !last_name || !password || !confirmPassword) {
+    //   throw new HTTPError('Todos los campos son obligatorios', 400);
+    // }
 
     const hashedPassword = await saltAndHashPassword(password);
 
@@ -54,8 +58,7 @@ export async function POST(req: Request) {
       {
         message: 'Admin user created successfully',
         user: newUser,
-      },
-      { status: 201 }
+      status: 200 }
     );
   } catch (error: any) {
     console.error(error);
@@ -70,7 +73,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ message: 'Error creating user', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Error creating user', error: error.message, status: 500 });
   }
 }
 

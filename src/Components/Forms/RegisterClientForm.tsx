@@ -2,18 +2,45 @@
 
 import SignInGoogleButton from "@/Components/Buttons/SigninGoogleButton";
 import Link from "next/link";
-import useRegisterClient from "@/hooks/useRegisterClient";
-("@/hooks/useRegisterClient");
+import useRegister from "@/hooks/useRegister";
+("@/hooks/useRegister");
 
 const RegisterClientForm = () => {
   const { errors, handleChange, handleSubmit, formData, handleCoverageChange } =
-    useRegisterClient({ apiUrl: "/api/auth/register", userType: "client" });
+    useRegister({ apiUrl: "/api/register/client", userType: "client" });
 
   return (
     <div className="min-h-screen flex items-center justify-center text-black bg-gray-800">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Registro</h2>
         <form onSubmit={handleSubmit} className="space-y-4 mb-2">
+          <div>
+            <label className="block text-sm font-medium">Nombre</label>
+            {errors.first_name && (
+              <p className="text-red-700">{errors.first_name}</p>
+            )}
+            <input
+              type="text"
+              name="first_name"
+              value={formData?.first_name}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Apellido</label>
+            {errors.last_name && (
+              <p className="text-red-700">{errors.last_name}</p>
+            )}
+            <input
+              type="text"
+              name="last_name"
+              value={formData?.last_name}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium">
               Correo Electrónico*
@@ -43,29 +70,19 @@ const RegisterClientForm = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Nombre</label>
-            {errors.first_name && (
-              <p className="text-red-700">{errors.first_name}</p>
+            <label className="block text-sm font-medium">
+              Confirmar Contraseña*
+            </label>
+            {errors.confirm_password && (
+              <p className="text-red-700">{errors.confirm_password}</p>
             )}
             <input
-              type="text"
-              name="first_name"
-              value={formData?.first_name}
+              type="password"
+              name="confirm_password"
+              value={formData?.confirm_password}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Apellido</label>
-            {errors.last_name && (
-              <p className="text-red-700">{errors.last_name}</p>
-            )}
-            <input
-              type="text"
-              name="last_name"
-              value={formData?.last_name}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
+              required
             />
           </div>
           <div>
@@ -98,19 +115,19 @@ const RegisterClientForm = () => {
               <p className="text-red-700">{errors.coverage}</p>
             )}
             {formData.coverage === "other" ? (
-              <div className="relative">
+              <div className="relative  ">
                 <input
                   type="text"
                   name="other_coverage"
                   value={formData.other_coverage || ""}
                   onChange={handleChange}
                   placeholder="Especifique otra cobertura"
-                  className="w-full p-2 border border-gray-300 rounded"
+                  className="w-full p-2 max-h-[40px] border border-gray-300 rounded "
                 />
 
                 <button
                   className="absolute 
-                  right-3 top-1 text-lg"
+                  right-2 top-2 "
                   onClick={() => handleCoverageChange("")}
                 >
                   x
@@ -121,7 +138,7 @@ const RegisterClientForm = () => {
                 name="coverage"
                 value={formData.coverage}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border min-h-[40px] border-gray-300 rounded"
               >
                 <option disabled value="">
                   Seleccione una opción

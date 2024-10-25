@@ -7,10 +7,10 @@ export async function saltAndHashPassword(password: string): Promise<string> {
 }
 export async function comparePassword(password: string, passwordToCompare: string): Promise<boolean>{
    return await bcrypt.compare(password, passwordToCompare);
-     
+    
 }
-export const hoursToMinutes = (hourString: string) => {
+export  function hoursToMinutes (hourString: string): number  {
     const [hours, minutes] = hourString.split(":").map(Number);
     const totalMinutes = hours * 60 + minutes;
-    return totalMinutes;
+    return  totalMinutes;
   };

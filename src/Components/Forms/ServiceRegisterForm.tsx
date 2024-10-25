@@ -1,198 +1,38 @@
 "use client";
 
+import useRegister from "@/hooks/useRegister";
 import { arrDays } from "@/lib/mock";
-import { hoursToMinutes } from "@/utils/helpers";
+// import { hoursToMinutes } from "@/utils/helpers";
 import { useState } from "react";
 
 const ServiceRegisterForm = () => {
-  const [availability, setAvailability] = useState<Availability[]>([]);
-  const [formData, setFormData] = useState<{
-    email: string;
-    name: string;
-    availability: [
-      {
-        day: string;
-        time_slot: {
-          start_time: string;
-          end_time: string;
-        };
-      }
-    ];
-    duration: string;
-    coverage?: string;
-  }>({
-    email: "",
-    name: "",
-    availability: [
-      {
-        day: "",
-        time_slot: { start_time: "", end_time: "" },
-      },
-    ],
-    duration: "",
-    coverage: "",
+  const {
+    handleChange,
+    formData,
+    handleSubmit,
+    handleChangeTimeSlots,
+    availability,
+    errors,
+  } = useRegister({
+    apiUrl: `/api/service`,
+    userType: "service",
   });
-
-  const [errors, setErrors] = useState<{
-    name?: string;
-    availability?: string;
-    duration?: string;
-    coverage?: string;
-    email?: string;
-  }>({});
-
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email || !emailPattern.test(formData.email)) {
-      newErrors.email = "Email inválido";
-    }
-
-    if (!formData.name) {
-      newErrors.name = "Debe seleccionar un servicio";
-    }
-
-    if (!formData.coverage) {
-      newErrors.coverage = "Debe seleccionar una cobertura";
-    }
-
-    if (!formData.duration) {
-      newErrors.duration = "Debe marcar una duracion del servicio";
-    }
-
-    if (availability.length === 0) {
-      newErrors.availability = "Debes seleccionar al menos un día.";
-    } else if (availability.length >= 1) {
-      let tsFull = true; // Time Slot Full
-      let totalTime = 0;
-      availability.forEach(ts => {
-        if (ts.time_slot.start_time === "") {
-          tsFull = false;
-          return;
-        }
-        if (ts.time_slot.end_time === "") {
-          tsFull = false;
-          console.log("hola");
-          return;
-        }
-
-        totalTime =
-          hoursToMinutes(ts.time_slot.end_time) -
-          hoursToMinutes(ts.time_slot.start_time);
-        if (Number(formData.duration) > totalTime) {
-          console.log(totalTime, Number(formData.duration));
-          newErrors.availability =
-            "El horario es mas corto que la duracion del servicio";
-        }
-      });
-      if (!tsFull) {
-        newErrors.availability = "Horarios mal seleccionados";
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-
-    if (checked) {
-      setAvailability(prev => [
-        ...prev,
-        { day: name, time_slot: { start_time: "", end_time: "" } },
-      ]);
-    } else {
-      setAvailability(prev => prev.filter(item => item.day !== name));
-    }
-  };
-
-  const handleChangeTimeSlots = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    day: string
-  ) => {
-    const { id, value } = e.target;
-    const isStart = id.includes("StartTime");
-
-    setAvailability(prevAvailability =>
-      prevAvailability.map(availabilityDay => {
-        if (availabilityDay.day === day) {
-          return {
-            ...availabilityDay,
-            time_slot: {
-              ...availabilityDay.time_slot,
-              start_time: isStart
-                ? value
-                : availabilityDay.time_slot.start_time,
-              end_time: !isStart ? value : availabilityDay.time_slot.end_time,
-            },
-          };
-        }
-        return availabilityDay;
-      })
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      const values = {
-        ...formData,
-        availability,
-      };
-      console.log("Valores enviados:", values);
-
-      const res = await fetch("/api/service", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      const data = await res.json();
-      if (res.status !== 201) {
-        throw new Error(`Error ${res.status}: ${data.message}`);
-      }
-
-      setFormData({
-        email: "",
-        name: "",
-        availability: [
-          {
-            day: "",
-            time_slot: { start_time: "", end_time: "" },
-          },
-        ],
-        duration: "",
-        coverage: "",
-      });
-    } catch (error) {
-      console.log("Error al enviar el formulario:", error);
-    }
-  };
-
-  // console.log(formData)
 
   return (
     <form
       onSubmit={handleSubmit}
       className="form-control my-10 mx-auto p-10 border border-accent-200 rounded md:w-1/3"
     >
+      {errors.api && <p className="text-red-700">{errors.api}</p>}
       <div>
         <label className="block text-sm font-medium">
           Email del profesional
         </label>
         <input
-          value={formData.email}
+          name="email"
+          value={formData?.email}
           type="email"
-          onChange={e => setFormData({ ...formData, email: e.target.value })}
+          onChange={handleChange}
           className="w-full p-2 border border-gray-300 rounded"
         />
         {errors.email && <p className="text-red-700">{errors.email}</p>}
@@ -200,9 +40,9 @@ const ServiceRegisterForm = () => {
       <div className="flex flex-col">
         <label className="label">Seleccione un servicio</label>
         <select
-          onChange={e => {
-            setFormData({ ...formData, name: e.target.value });
-          }}
+          name="name"
+          value={formData?.name}
+          onChange={handleChange}
           className="select w-full max-w-xs select-bordered"
         >
           <option>Servicio 1</option>
@@ -216,9 +56,9 @@ const ServiceRegisterForm = () => {
       <div className="flex flex-col">
         <label className="label">Seleccione una cobertura</label>
         <select
-          onChange={e => {
-            setFormData({ ...formData, coverage: e.target.value });
-          }}
+          name="coverage"
+          value={formData?.coverage}
+          onChange={handleChange}
           className="select w-full max-w-xs select-bordered"
         >
           <option>Sin cobertura</option>
@@ -234,14 +74,11 @@ const ServiceRegisterForm = () => {
           Duracion del servicio
         </label>
         <select
+          name="duration"
+          value={formData?.duration}
           id="timeFragmentSelect"
           className="select select-bordered w-full max-w-xs"
-          onChange={e => {
-            setFormData({
-              ...formData,
-              duration: e.target.value.toString(),
-            });
-          }}
+          onChange={handleChange}
         >
           <option value="">Seleccione un tiempo</option>
           <option value="15">15 min</option>
@@ -268,7 +105,7 @@ const ServiceRegisterForm = () => {
               type="checkbox"
               id={day.id + "Availability"}
               name={day.id}
-              onChange={changeHandler}
+              onChange={handleChange}
               className="checkbox checkbox-primary"
             />
             <label className="label" htmlFor={day.id}>

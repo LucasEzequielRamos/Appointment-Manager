@@ -1,7 +1,7 @@
 "use client";
 
 import SignInGoogleButton from "@/Components/Buttons/SigninGoogleButton";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -25,10 +25,13 @@ const LoginUserForm = () => {
       password: password,
       redirect: false,
     });
-    console.log(res);
+    console.log({ res });
     if (res?.error !== null) {
       setError("El mail o la contraseña son incorrectos");
+      return;
     }
+
+    await getSession();
     router.push("/home");
   };
 
@@ -52,7 +55,7 @@ const LoginUserForm = () => {
               id="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-500"
+              className="w-full text-black mt-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-500"
               placeholder="Ingresa tu correo"
             />
           </div>
@@ -68,7 +71,7 @@ const LoginUserForm = () => {
               id="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-500"
+              className="w-full text-black mt-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-500"
               placeholder="Ingresa tu contraseña"
             />
           </div>

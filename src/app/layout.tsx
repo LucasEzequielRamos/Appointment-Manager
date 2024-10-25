@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Navbar from "@/Components/Navbar/NavbarHeader";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,10 +13,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html data-theme='mytheme' lang="en">
-      <body
-       
-      >
+    <html data-theme="mytheme" lang="en">
+      <body>
+        <Navbar />
         {children}
       </body>
     </html>

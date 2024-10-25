@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db'
-import { saltAndHashPassword } from "@/utils/password"
+import { saltAndHashPassword } from "@/utils/helpers"
 
 
 export async function POST (req: NextRequest) {
   try {
     const { first_name, last_name, email, password, address, phone, coverage } = await req.json()
 
-    if(!email) return NextResponse.json({ error: 'El mail es obligatorio.' }, { status: 400 });
+    if(!email) return NextResponse.json({ error: 'El mail es obligatorio.' , status: 400 });
     
     
     const userFound = await db.user.findUnique({
@@ -44,12 +44,12 @@ export async function POST (req: NextRequest) {
     });
 
 
-    return NextResponse.json({ message: 'Client user created successfully', user: newUser , status: 201 });
+    return NextResponse.json({ message: 'Client user created successfully', user: newUser , status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
       message: 'Error creating user',
       error: error.message,
-    }, { status: 500 });
+     status: 500 });
   }
 }

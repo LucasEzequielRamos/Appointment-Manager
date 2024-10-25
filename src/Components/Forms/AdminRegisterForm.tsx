@@ -1,9 +1,9 @@
 "use client";
 
-import useRegisterClient from "@/hooks/useRegisterClient";
+import useRegister from "@/hooks/useRegister";
 
 const AdminRegisterForm = ({ role }: { role: string }) => {
-  const { errors, handleChange, handleSubmit, formData } = useRegisterClient({
+  const { errors, handleChange, handleSubmit, formData } = useRegister({
     apiUrl: `/api/register/${role}`,
     userType: role,
   });
@@ -12,7 +12,7 @@ const AdminRegisterForm = ({ role }: { role: string }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-800 text-black">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          Registro de administrador
+          Registro de {role}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -83,7 +83,7 @@ const AdminRegisterForm = ({ role }: { role: string }) => {
             type="submit"
             className="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
           >
-            Registrar profesional
+            Registrar {role}
           </button>
         </form>
       </div>

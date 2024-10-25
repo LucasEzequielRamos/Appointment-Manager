@@ -26,16 +26,16 @@ export async function GET (req: NextRequest) {
     // console.log(usersFound)
 
     if (!usersFound) {
-      return NextResponse.json({ message: 'User not found' }, { status: 400 });
+      return NextResponse.json({ message: 'User not found' , status: 400 });
     }
    
 
-    return NextResponse.json({ message: 'User found successfully', user: usersFound }, { status: 201 });
+    return NextResponse.json({ message: 'User found successfully', user: usersFound , status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
       message: 'Error creating user',
       error: error.message,
-    }, { status: 500 });
+     status: 500 });
   }
 }

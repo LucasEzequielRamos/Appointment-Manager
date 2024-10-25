@@ -23,7 +23,19 @@ interface User {
   professional?: Professional | null; 
 }
 
-interface UserToRegister{
+interface FormDataToRegister{
+  name?: string;
+  availability?: [
+    {
+      day?: string;
+      time_slot?: {
+        start_time?: string;
+        end_time?: string;
+      };
+    }
+  ];
+  duration?: string;
+  coverage?: string;
   email?: string ;
   password?: string ;
   confirm_password?:string ;
@@ -33,6 +45,23 @@ interface UserToRegister{
   phone?: string ;
   coverage?: string ;
   other_coverage?: string ;
+}
+
+interface ErrorsFormData{
+  api?: string
+  name?: string;
+    availability?: string;
+    duration?: string;
+    coverage?: string;
+    email?: string;
+    password?: string ;
+  confirm_password?:string ;
+  first_name?: string ;
+  last_name?: string ;
+  address?: string ;
+  phone?: string ;
+  other_coverage?: string ;
+
 }
 
 interface Professional {
@@ -47,13 +76,20 @@ interface Client {
   coverage: string;
   other_coverage: string;
 }
-interface Service {
-  id: number;
+interface ServiceToRegister {
+  email: string;
   name: string;
-  duration: string; 
-  coverage: string;
-  professional_id: number;
-  availability: Availability[];
+  availability: [
+    {
+      day: string;
+      time_slot: {
+        start_time: string;
+        end_time: string;
+      };
+    }
+  ];
+  duration: string;
+  coverage?: string;
 }
 
 interface TimeSlot {

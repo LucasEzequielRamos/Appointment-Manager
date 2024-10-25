@@ -1,29 +1,27 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { TimeSlot, WeekDay } from '@prisma/client';
 
-type DayAvailability = {
-  day: WeekDay;            
-  time_slot: TimeSlot;  
-};
+
 
 
 
 export async function POST(req: NextRequest) {
   try {
     const {  email, name, coverage,duration, availability  } = await req.json()
-    console.log(email,name,coverage,duration,availability)
+
+    console.log(email, name, coverage,duration, availability, 'LOG EN API')
 
     if (!email|| !name|| !coverage||!duration|| !availability ) {
-      return NextResponse.json({ error: 'Todos los campos son obligatorios.' }, {status:400});
+      return NextResponse.json({ message: 'Todos los campos son obligatorios.' , status:400});
     }
 
     const userFound = await db.user.findUnique({
       where: { email: email },
     });
+    console.log(userFound , 'LOG EN API')
    
     if(!userFound || userFound.role !== 'PROFESSIONAL'){
-        return NextResponse.json({ error: 'No existe un usuario profesional con ese correo electronico', status:400})
+        return NextResponse.json({ message: 'No existe un usuario profesional con ese correo electronico', status:400})
     }
 
     const newService = await db.service.create({
@@ -42,13 +40,13 @@ export async function POST(req: NextRequest) {
       });
 
 
-    return NextResponse.json({ message: 'Service added created successfully', user: newService }, { status: 201 });
+    return NextResponse.json({ message: 'Service added  successfully', user: newService ,  status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
-      message: 'Error creating professional user',
+      message: 'Error creating service user',
       error: error.message,
-    }, { status: 500 });
+      status: 500 });
   }
 }
 export async function GET(req: NextRequest) {
@@ -68,13 +66,13 @@ export async function GET(req: NextRequest) {
         
       });
 
-    return NextResponse.json({ message: 'Service added created successfully', user: servicesFound }, { status: 201 });
+    return NextResponse.json({ message: 'Service added created successfully', user: servicesFound ,  status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
       message: 'Error creating professional user',
       error: error.message,
-    }, { status: 500 });
+      status: 500 });
   }
 }
 

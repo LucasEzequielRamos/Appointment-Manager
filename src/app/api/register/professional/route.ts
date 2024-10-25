@@ -1,36 +1,27 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
 import db from '@/lib/db';
-import { TimeSlot, WeekDay } from '@prisma/client';
-
-type DayAvailability = {
-  day: WeekDay;            
-  time_slot: TimeSlot;  
-};
-
+import { saltAndHashPassword } from '@/utils/helpers';
 
 
 export async function POST(req: NextRequest) {
   try {
-    const { first_name, last_name, email, password, confirm_password } = await req.json()
+    const { first_name, last_name, email, password } = await req.json()
 
-    console.log(first_name, last_name, email, password, confirm_password)
 
-    if (!first_name || !last_name || !email || !password || !confirm_password  ) {
-      return NextResponse.json({ error: 'Todos los campos son obligatorios, incluyendo el perfil de profesional.' }, {status:400});
+    if (!first_name || !last_name || !email || !password   ) {
+      return NextResponse.json({ error: 'Todos los campos son obligatorios.' ,status:400});
     }
 
     const userFound = await db.user.findUnique({
       where: { email: email },
     });
 
-    console.log(userFound)
     if (userFound) {
-      return NextResponse.json({ message: 'User already exists' }, { status: 400 });
+      return NextResponse.json({ message: 'User already exists' , status: 400 });
     }
 
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await saltAndHashPassword(password)
 
     const newUser = await db.user.create({
       data: {
@@ -46,14 +37,13 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-    console.log(newUser)
 
-    return NextResponse.json({ message: 'Professional user created successfully', user: email }, { status: 201 });
+    return NextResponse.json({ message: 'Professional user created successfully', user: newUser , status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
       message: 'Error creating professional user',
       error: error.message,
-    }, { status: 500 });
+    status: 500 });
   }
 }

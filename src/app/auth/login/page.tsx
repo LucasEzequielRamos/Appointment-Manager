@@ -5,7 +5,6 @@ import LoginUserForm from "@/Components/Forms/LoginUserForm";
 
 const page = async () => {
   const session = await auth();
-  console.log({ session });
   if (session) redirect("/home");
   return (
     <div>

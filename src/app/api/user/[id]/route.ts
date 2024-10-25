@@ -30,16 +30,16 @@ export async function GET (req: NextRequest, {params}: {params:{id: number}}) {
 
 
     if (!userFound) {
-      return NextResponse.json({ message: 'User not found' }, { status: 400 });
+      return NextResponse.json({ message: 'User not found', status: 400 });
     }
    
 
-    return NextResponse.json({ message: 'User found successfully', user: userFound }, { status: 201 });
+    return NextResponse.json({ message: 'User found successfully', user: userFound, status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
       message: 'Error creating user',
       error: error.message,
-    }, { status: 500 });
+     status: 500 });
   }
 }
