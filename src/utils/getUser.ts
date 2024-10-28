@@ -1,42 +1,34 @@
-import { auth } from '@/auth'
+import { auth } from "@/auth";
+const apiUrl = process.env.NEXT_API_URL || 'http://localhost:3000/api';
 
-export async function getUserById (id: number): Promise<any> {
+export async function getUserById(id: number): Promise<any> {
   try {
-    const userData = await auth()
-    
+    const userData = await auth();
 
     if (userData !== undefined) {
-      const res = await fetch(`${process.env.NEXTAUTH_URL}api/user/${id}`, {
-        method: 'GET'
-      })
+      const res = await fetch(`${apiUrl}/user/${id}`, {
+        method: "GET",
+      });
 
-      const {user} = await res.json()
-      return user
+      const { user } = await res.json();
+      return user;
     } else {
-      return null
+      return null;
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }
 
-
-export async function getAllUsers (): Promise<any> {
+export async function getAllUsers(): Promise<any> {
   try {
-    const userData = await auth()
-    
+    const res = await fetch(`${apiUrl}/user`, {
+      method: "GET",
+    });
 
-    if (userData !== undefined) {
-      const res = await fetch(`${process.env.NEXTAUTH_URL}api/user`, {
-        method: 'GET'
-      })
-
-      const {user: usersList} = await res.json()
-      return usersList
-    } else {
-      return null
-    }
+    const { user: usersList } = await res.json();
+    return usersList;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }

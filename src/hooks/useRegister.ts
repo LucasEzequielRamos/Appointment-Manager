@@ -1,7 +1,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-
 import React from 'react'
+
 function hoursToMinutes(hourString: string) {
   const [hours, minutes] = hourString.split(":").map(Number);
   return  hours * 60 + minutes;
@@ -127,7 +127,6 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
       }
     }
         }
-    
        
         
         setErrors(newErrors);
@@ -253,7 +252,8 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
         coverage: "",
         other_coverage: "",
       })
-      setAvailability([])
+      setAvailability([]),
+      (e.target as HTMLFormElement).reset();
     };
     
   return {

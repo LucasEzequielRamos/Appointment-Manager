@@ -1,24 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getAllUsers } from "@/utils/getUser";
 
 interface AdminDashboardProps {
   user: any;
-  users: any[];
-  services: any[];
-  appointments: any[];
-  professionals: any[];
+  // users: any[];
+  // services: any[];
+  // appointments: any[];
+  // professionals: any[];
 }
 
 const AdminDashboard = ({
   user,
-  users,
-  services,
-  appointments,
-  professionals,
+  // users,
+  // services,
+  // appointments,
+  // professionals,
 }: AdminDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("usuarios");
+  const [activeTab, setActiveTab] = useState("");
+  const [data, setData] = useState([]);
+  
+  useEffect(() => {
+    if (activeTab === "usuarios") {
+      getAllUsers()
+       .then((users) => setData(users))
+    }
+    
+  }, [activeTab])
+  
 
   return (
     <main>
@@ -79,11 +90,10 @@ const AdminDashboard = ({
           </button>
         </div>
 
-        {activeTab === "usuarios" && (
+        {typeof data === "object" && (
           <div>
-            <h4 className="text-lg font-semibold">Usuarios:</h4>
-            {users.length > 1 ? (
-              users.map((user: any) => (
+            {data.length > 1 ? (
+              data.map((user: any) => (
                 <div key={user.user_id}>
                   {user.first_name} {user.last_name}
                 </div>
@@ -94,7 +104,7 @@ const AdminDashboard = ({
           </div>
         )}
 
-        {activeTab === "servicios" && (
+        {/* {activeTab === "servicios" && (
           <div>
             <h4 className="text-lg font-semibold">Servicios:</h4>
             {services.length > 1 ? (
@@ -133,7 +143,7 @@ const AdminDashboard = ({
               <p>No hay ningun profesioal registrado</p>
             )}
           </div>
-        )}
+        )} */}
       </div>
     </main>
   );

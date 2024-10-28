@@ -3,7 +3,6 @@
 import useRegister from "@/hooks/useRegister";
 import { arrDays } from "@/lib/mock";
 // import { hoursToMinutes } from "@/utils/helpers";
-import { useState } from "react";
 
 const ServiceRegisterForm = () => {
   const {
