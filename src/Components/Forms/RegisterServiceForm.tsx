@@ -4,10 +4,10 @@ import useRegister from "@/hooks/useRegister";
 import { arrDays } from "@/lib/mock";
 // import { hoursToMinutes } from "@/utils/helpers";
 
-const ServiceRegisterForm = () => {
+const RegisterServiceForm = () => {
   const {
     handleChange,
-    formData,
+    formPostData,
     handleSubmit,
     handleChangeTimeSlots,
     availability,
@@ -15,6 +15,7 @@ const ServiceRegisterForm = () => {
   } = useRegister({
     apiUrl: `/api/service`,
     userType: "service",
+    method: "POST",
   });
 
   return (
@@ -29,7 +30,7 @@ const ServiceRegisterForm = () => {
         </label>
         <input
           name="email"
-          value={formData?.email}
+          value={formPostData?.email}
           type="email"
           onChange={handleChange}
           className="w-full p-2 border border-gray-300 rounded"
@@ -40,7 +41,7 @@ const ServiceRegisterForm = () => {
         <label className="label">Seleccione un servicio</label>
         <select
           name="name"
-          value={formData?.name}
+          value={formPostData?.name}
           onChange={handleChange}
           className="select w-full max-w-xs select-bordered"
         >
@@ -56,7 +57,7 @@ const ServiceRegisterForm = () => {
         <label className="label">Seleccione una cobertura</label>
         <select
           name="coverage"
-          value={formData?.coverage}
+          value={formPostData?.coverage}
           onChange={handleChange}
           className="select w-full max-w-xs select-bordered"
         >
@@ -74,7 +75,7 @@ const ServiceRegisterForm = () => {
         </label>
         <select
           name="duration"
-          value={formData?.duration}
+          value={formPostData?.duration}
           id="timeFragmentSelect"
           className="select select-bordered w-full max-w-xs"
           onChange={handleChange}
@@ -157,4 +158,4 @@ const ServiceRegisterForm = () => {
   );
 };
 
-export default ServiceRegisterForm;
+export default RegisterServiceForm;

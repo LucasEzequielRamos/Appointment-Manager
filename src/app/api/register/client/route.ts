@@ -7,7 +7,7 @@ export async function POST (req: NextRequest) {
   try {
     const { first_name, last_name, email, password, address, phone, coverage } = await req.json()
 
-    if(!email) return NextResponse.json({ error: 'El mail es obligatorio.' , status: 400 });
+    if(!email) return NextResponse.json({ error: 'El mail es obligatorio.' , status: 404 });
     
     
     const userFound = await db.user.findUnique({
@@ -15,11 +15,11 @@ export async function POST (req: NextRequest) {
     });
 
     if (userFound) {
-      return NextResponse.json({ message: 'User already exists', status: 400 });
+      return NextResponse.json({ message: 'User already exists', status: 404 });
     }
 
     if (!first_name || !last_name || !password || !address || !phone || !coverage) {
-      return NextResponse.json({ message: 'Todos los campos son obligatorios', status: 400 });
+      return NextResponse.json({ message: 'Todos los campos son obligatorios', status: 404 });
     }
 
     const isAdmin = email === 'lucas@admin.com' ?  'ADMIN' : 'CLIENT'

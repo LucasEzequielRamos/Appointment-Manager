@@ -5,8 +5,8 @@ import Link from "next/link";
 
 interface ProfessionalDashboardProps {
   user: any;
-  appointments: any[];
-  services: any[];
+  appointments?: any[];
+  services?: any[];
 }
 
 const ProfessionalDashboard = ({
@@ -56,7 +56,7 @@ const ProfessionalDashboard = ({
         </div>
 
         {/* Tab para ver los turnos ocupados */}
-        {activeTab === "appointments" && (
+        {/* {activeTab === "appointments" && (
           <div>
             <h4 className="text-lg font-semibold">Turnos Ocupados:</h4>
             {appointments.length > 0 ? (
@@ -77,10 +77,10 @@ const ProfessionalDashboard = ({
               <p>No tienes ningún turno ocupado.</p>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Tab para ver los servicios que ofrece */}
-        {activeTab === "services" && (
+        {/* {activeTab === "services" && (
           <div>
             <h4 className="text-lg font-semibold">Servicios que Ofrezco:</h4>
             {services.length > 0 ? (
@@ -93,7 +93,7 @@ const ProfessionalDashboard = ({
               <p>No ofreces ningún servicio.</p>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Tab para ver los datos del profesional */}
         {activeTab === "professionalData" && (

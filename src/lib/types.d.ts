@@ -23,7 +23,7 @@ interface User {
   professional?: Professional | null; 
 }
 
-interface FormDataToRegister{
+interface formPostDataToRegister{
   name?: string;
   availability?: [
     {
@@ -47,7 +47,7 @@ interface FormDataToRegister{
   other_coverage?: string ;
 }
 
-interface ErrorsFormData{
+interface ErrorsformPostData{
   api?: string
   name?: string;
     availability?: string;

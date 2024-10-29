@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import UpdateClientForm from "../Forms/UpdateClientForm";
 
 interface ClientDashboardProps {
   user: any;
-  appointments: any[];
+  appointments?: any[];
 }
 
 const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
   const [activeTab, setActiveTab] = useState("myAppointments");
+  const [formView, setFormView] = useState(false);
 
   return (
     <main>
@@ -47,7 +49,7 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
         </div>
 
         {/* Tab for Viewing Appointments */}
-        {activeTab === "myAppointments" && (
+        {/* {activeTab === "myAppointments" && (
           <div>
             <h4 className="text-lg font-semibold">Mis Turnos:</h4>
             {appointments.length > 0 ? (
@@ -68,7 +70,7 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
               <p>No tienes ningún turno reservado.</p>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Tab for Booking a New Appointment */}
         {activeTab === "newAppointment" && (
@@ -104,13 +106,16 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
             <p>
               <strong>Numero de contacto:</strong> {user.client.phone}
             </p>
-            <Link href="/user/profile">
-              <button className="mt-4 p-2 bg-blue-500 text-white rounded">
-                Ver/Actualizar Mis Datos
-              </button>
-            </Link>
+            <button
+              onClick={() => setFormView(!formView)}
+              className="mt-4 p-2 bg-blue-500 text-white rounded"
+            >
+              Ver/Actualizar Mis Datos
+            </button>
           </div>
         )}
+
+        {formView && <UpdateClientForm data={user} />}
       </div>
     </main>
   );

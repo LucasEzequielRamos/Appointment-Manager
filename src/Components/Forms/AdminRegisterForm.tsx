@@ -3,7 +3,7 @@
 import useRegister from "@/hooks/useRegister";
 
 const AdminRegisterForm = ({ role }: { role: string }) => {
-  const { errors, handleChange, handleSubmit, formData } = useRegister({
+  const { errors, handleChange, handleSubmit, formPostData } = useRegister({
     apiUrl: `/api/register/${role}`,
     userType: role,
   });
@@ -19,7 +19,7 @@ const AdminRegisterForm = ({ role }: { role: string }) => {
             <label className="block text-sm font-medium">Nombre</label>
             <input
               name="first_name"
-              value={formData.first_name}
+              value={formPostData.first_name}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -31,7 +31,7 @@ const AdminRegisterForm = ({ role }: { role: string }) => {
             <label className="block text-sm font-medium">Apellido</label>
             <input
               name="last_name"
-              value={formData.last_name}
+              value={formPostData.last_name}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -43,7 +43,7 @@ const AdminRegisterForm = ({ role }: { role: string }) => {
             <label className="block text-sm font-medium">Email</label>
             <input
               name="email"
-              value={formData.email}
+              value={formPostData.email}
               type="email"
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
@@ -55,7 +55,7 @@ const AdminRegisterForm = ({ role }: { role: string }) => {
             <input
               type="password"
               name="password"
-              value={formData.password}
+              value={formPostData.password}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -70,7 +70,7 @@ const AdminRegisterForm = ({ role }: { role: string }) => {
             <input
               type="password"
               name="confirm_password"
-              value={formData.confirm_password}
+              value={formPostData.confirm_password}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
             />

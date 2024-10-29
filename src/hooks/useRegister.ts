@@ -7,124 +7,233 @@ function hoursToMinutes(hourString: string) {
   return  hours * 60 + minutes;
 }
 
-const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => {
+const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?:string,  method:string, data?: any},) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     
-    const [formData, setFormData ] = useState<FormDataToRegister >(
-      userType === 'service' 
+
+    const [formPostData, setFormPostData ] = useState<formPostDataToRegister | any >(
+      userType === 'service'
       ?
-        {
-          email: "",
-          name: "",
-          duration: "",
-          coverage: "",
-        }
+      {
+        email: "",
+        name: "",
+        duration: "",
+        coverage: "",
+      }
       :
       {
-      email: searchParams?.get("email") || "",
-      password: "",
-      confirm_password:"",
-      first_name: searchParams?.get("first_name") || "",
-      last_name: searchParams?.get("last_name") || "",
-      address: "",
-      phone: "",
-      coverage: "",
-      other_coverage: "",
-    });
+        email: searchParams?.get("email") || "",
+        password: "",
+        confirm_password:"",
+        first_name: searchParams?.get("first_name") || "",
+        last_name: searchParams?.get("last_name") || "",
+        address: "",
+        phone: "",
+        coverage: "",
+        other_coverage: "",
+      }
+      
+    );
     
-    const [errors, setErrors] = useState<ErrorsFormData >({
+    const [formPutData, setFormPutData] = useState<formPostDataToRegister | any >(
+      userType === 'service'
+      ?
+      {
+        email: data.email,
+        name: data.name,
+        duration: data.duration,
+        coverage: data.coverage,
+      }
+      :
+      {
+        email:data.data.email  ,
+        // password:data.data.password ,
+        // confirm_password:data.data.confirm_password,
+        first_name:data.data.first_name  ,
+        last_name:data.data.last_name  ,
+        address:data.data.client.address ,
+        phone:data.data.client.phone ,
+        coverage:data.data.client.coverage ,
+        other_coverage:data.data.client.other_coverage ,
+      }
+    )
+
+    console.log(formPutData)
+
+    const [errors, setErrors] = useState<ErrorsformPostData >({
       
     });
 
   const [availability, setAvailability] = useState<Availability[]>([]);
 
+  const validateFormPut = () => {
+    const newErrors: typeof errors = {};
 
-  const validateForm = () => {
+    if(userType !== 'service'){
+      if (!formPutData.first_name || formPutData.first_name.length < 2) {
+        newErrors.first_name = "El nombre debe contener al menos 2 caracteres.";
+      }
+  
+      if (!formPutData.last_name || formPutData.last_name.length < 2) {
+        newErrors.last_name = "El apellido debe contener al menos 2 caracteres.";
+      }     
+      
+      // if (formPutData.password && formPutData.password.length < 8) {
+      //   newErrors.password = "La contraseña debe contener al menos 8 caracteres";
+      // }
+      
+      // if (formPostData.password !== formPostData.confirm_password) {
+      //   newErrors.confirm_password = "Las contraseñas no coinciden";
+      // }
+      
+      if(userType === 'client'){
+        if (!formPutData.address || formPutData.address.length < 2) {
+          newErrors.address = "Debe escribir su direccion";
+        }
+        if (!formPutData.phone || formPutData.phone.length < 2) {
+          newErrors.phone = "Debe escribir su numero de contacto";
+        }
+        if (!formPutData.coverage  && !formPutData.other_coverage ) {
+          newErrors.coverage = "Debe seleccionar una cobertura";
+        }
+      }
+    }else{          
+      if (!formPutData.name) {
+        newErrors.name = "Debe seleccionar un servicio";
+      }
+
+      if (!formPutData.coverage) {
+        newErrors.coverage = "Debe seleccionar una cobertura";
+      }
+
+      if (!formPutData.duration) {
+        newErrors.duration = "Debe marcar una duracion del servicio";
+      }
+
+      if (availability.length === 0) {
+        newErrors.availability = "Debes seleccionar al menos un día.";
+      } else if (availability.length >= 1) {
+        let tsFull = true; // Time Slot Full
+        let totalTime = 0;
+        availability.forEach(ts => {
+          if (ts.time_slot.start_time === "") {
+            tsFull = false;
+            return;
+          }
+          if (ts.time_slot.end_time === "") {
+            tsFull = false;
+            console.log("hola");
+            return;
+          }
+          const startMinutes = hoursToMinutes(ts.time_slot.start_time);
+          const endMinutes = hoursToMinutes(ts.time_slot.end_time);
+      
+          let duration = endMinutes >= startMinutes 
+            ? endMinutes - startMinutes 
+            : (24 * 60) - startMinutes + endMinutes; 
+      
+          totalTime += duration;
+          if (Number(formPutData.duration) > totalTime) {
+            console.log(totalTime, Number(formPutData.duration));
+            newErrors.availability =
+              "El horario es mas corto que la duracion del servicio";
+          }
+        });
+        if (!tsFull) {
+          newErrors.availability = "Horarios mal seleccionados";
+        }
+      }
+    }
+   
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateFormPost = () => {
         const newErrors: typeof errors = {};
 
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!formData.email || !emailPattern.test(formData.email)) {
+        if (!formPutData.email || !emailPattern.test(formPostData.email)) {
           newErrors.email = "Email inválido";
         }
-        
-
         if(userType !== 'service'){
-          if (!formData.first_name || formData.first_name.length < 2) {
+          if (!formPostData.first_name || formPostData.first_name.length < 2 && !formPutData.first_name || formPutData.first_name.length < 2) {
+            console.log(formPutData.first_name.length)
             newErrors.first_name = "El nombre debe contener al menos 2 caracteres.";
           }
       
-          if (!formData.last_name || formData.last_name.length < 2) {
+          if (!formPostData.last_name || formPostData.last_name.length < 2 && !formPutData.last_name || formPutData.last_name.length < 2) {
             newErrors.last_name = "El apellido debe contener al menos 2 caracteres.";
           }
           
           
-          if (!formData.password || formData.password.length < 8) {
+          if (!formPostData.password || formPostData.password.length < 8 && !formPutData.password || formPutData.password.length < 8) {
             newErrors.password = "La contraseña debe contener al menos 8 caracteres";
           }
           
-          if (formData.password !== formData.confirm_password) {
+          if (formPostData.password !== formPostData.confirm_password) {
             newErrors.confirm_password = "Las contraseñas no coinciden";
           }
           
           if(userType === 'client'){
-            if (!formData.address || formData.address.length < 2) {
+            if (!formPostData.address || formPostData.address.length < 2) {
               newErrors.address = "Debe escribir su direccion";
             }
-            if (!formData.phone || formData.phone.length < 2) {
+            if (!formPostData.phone || formPostData.phone.length < 2) {
               newErrors.phone = "Debe escribir su numero de contacto";
             }
-            if (!formData.coverage  && !formData.other_coverage ) {
+            if (!formPostData.coverage  && !formPostData.other_coverage ) {
               newErrors.coverage = "Debe seleccionar una cobertura";
             }
           }
-        }else{
+        }else{          
+          if (!formPostData.name) {
+            newErrors.name = "Debe seleccionar un servicio";
+          }
+
+          if (!formPostData.coverage) {
+            newErrors.coverage = "Debe seleccionar una cobertura";
+          }
+
+          if (!formPostData.duration) {
+            newErrors.duration = "Debe marcar una duracion del servicio";
+          }
+
+          if (availability.length === 0) {
+            newErrors.availability = "Debes seleccionar al menos un día.";
+          } else if (availability.length >= 1) {
+            let tsFull = true; // Time Slot Full
+            let totalTime = 0;
+            availability.forEach(ts => {
+              if (ts.time_slot.start_time === "") {
+                tsFull = false;
+                return;
+              }
+              if (ts.time_slot.end_time === "") {
+                tsFull = false;
+                console.log("hola");
+                return;
+              }
+              const startMinutes = hoursToMinutes(ts.time_slot.start_time);
+              const endMinutes = hoursToMinutes(ts.time_slot.end_time);
           
-    if (!formData.name) {
-      newErrors.name = "Debe seleccionar un servicio";
-    }
-
-    if (!formData.coverage) {
-      newErrors.coverage = "Debe seleccionar una cobertura";
-    }
-
-    if (!formData.duration) {
-      newErrors.duration = "Debe marcar una duracion del servicio";
-    }
-
-    if (availability.length === 0) {
-      newErrors.availability = "Debes seleccionar al menos un día.";
-    } else if (availability.length >= 1) {
-      let tsFull = true; // Time Slot Full
-      let totalTime = 0;
-      availability.forEach(ts => {
-        if (ts.time_slot.start_time === "") {
-          tsFull = false;
-          return;
-        }
-        if (ts.time_slot.end_time === "") {
-          tsFull = false;
-          console.log("hola");
-          return;
-        }
-        const startMinutes = hoursToMinutes(ts.time_slot.start_time);
-        const endMinutes = hoursToMinutes(ts.time_slot.end_time);
-    
-        let duration = endMinutes >= startMinutes 
-          ? endMinutes - startMinutes 
-          : (24 * 60) - startMinutes + endMinutes; 
-    
-        totalTime += duration;
-        if (Number(formData.duration) > totalTime) {
-          console.log(totalTime, Number(formData.duration));
-          newErrors.availability =
-            "El horario es mas corto que la duracion del servicio";
-        }
-      });
-      if (!tsFull) {
-        newErrors.availability = "Horarios mal seleccionados";
-      }
-    }
+              let duration = endMinutes >= startMinutes 
+                ? endMinutes - startMinutes 
+                : (24 * 60) - startMinutes + endMinutes; 
+          
+              totalTime += duration;
+              if (Number(formPostData.duration) > totalTime) {
+                console.log(totalTime, Number(formPostData.duration));
+                newErrors.availability =
+                  "El horario es mas corto que la duracion del servicio";
+              }
+            });
+            if (!tsFull) {
+              newErrors.availability = "Horarios mal seleccionados";
+            }
+          }
         }
        
         
@@ -136,12 +245,15 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
       e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,      
     ) => {
       const { name, value } = e.target;
-      console.log(name, value)
       if (name === "phone" && value.length > 15) return;
     
       if (name === "phone") {
-        setFormData({
-          ...formData,
+        setFormPostData({
+          ...formPostData,
+          [name]: value.toString(),
+        });
+        setFormPutData({
+          ...formPutData,
           [name]: value.toString(),
         });
       }
@@ -157,8 +269,12 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
         }
       }
 
-      setFormData({
-        ...formData,
+      setFormPostData({
+        ...formPostData,
+        [name]: value,
+      });
+      setFormPutData({
+        ...formPutData,
         [name]: value,
       });
     };
@@ -190,7 +306,11 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
     };
 
     const handleCoverageChange = (newCoverage: string) => {
-      setFormData((prevData) => ({
+      setFormPostData((prevData: any) => ({
+        ...prevData,
+        coverage: newCoverage,
+      }));
+      setFormPutData((prevData: any) => ({
         ...prevData,
         coverage: newCoverage,
       }));
@@ -198,37 +318,56 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
     
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!validateForm()) {
-        return;
+      
+      if(method === 'POST'){
+        if(!validateFormPost()) return
+      }else{
+        if(!validateFormPut()) return
       }
+    
 
-      const values = userType === 'service' ?{
-        ...formData,
+      const valuesToPost = userType === 'service'  ?{
+        ...formPostData,
         availability
       }:
       {
-      ...formData
+      ...formPostData
       }
+
+      const valuesToPut = userType === 'service'  ?{
+        ...formPutData,
+        availability,
+        role: data.role,
+        user_id: data.user_id
+      }
+      :
+      {
+      ...formPutData,
+      role: data.data.role,
+      user_id: data.data.user_id
+      
+      }
+
 
     
       const res = await fetch(`${apiUrl}`, {
-        method: "POST",
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body:  JSON.stringify(method ===' POST' ? valuesToPost : valuesToPut),
       });
-      const data = await res.json();
-      console.log(data, 'LOG EN HOOK')
+      const dataFetch = await res.json();
+      console.log(dataFetch, 'LOG EN HOOK AAAAAAAA')
     
-      if (data.status !== 201){
+      if (dataFetch.status !== 201){
         setErrors({api: data.message});
       } 
-      if(data.message === 'Client user created successfully' && userType === 'client'){
+      if(dataFetch.message === 'Client user created successfully' && userType === 'client'){
         router.push('/auth/login')
       }
     
-      setFormData(userType === 'service' 
+      setFormPostData(userType === 'service' 
         ?
           {
             email: "",
@@ -256,10 +395,11 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
     handleChange,
     handleSubmit,
     errors,
-    formData,
+    formPostData,
     handleCoverageChange,
     availability,
-    handleChangeTimeSlots
+    handleChangeTimeSlots,
+    formPutData
   }
 }
 

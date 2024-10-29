@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     console.log(userFound , 'LOG EN API')
    
     if(!userFound || userFound.role !== 'PROFESSIONAL'){
-        return NextResponse.json({ message: 'No existe un usuario profesional con ese correo electronico', status:400})
+        return NextResponse.json({ message: 'No existe un usuario profesional con ese correo electronico', status: 404})
     }
 
     const newService = await db.service.create({
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       });
 
 
-    return NextResponse.json({ message: 'Service added successfully', service: newService, status: 201 });
+    return NextResponse.json({ message: 'Servicio agregado correctamente', service: newService, status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
@@ -49,20 +49,19 @@ export async function GET(req: NextRequest) {
   try {
 
     const servicesFound = await db.service.findMany({
-      
         include:{
-          
           availability:{
             include:{
               time_slot: true
             }
           },
-          
         }
         
       });
 
-    return NextResponse.json({ message: 'Services founded successfully', service: servicesFound ,  status: 200 });
+      if(!servicesFound) return NextResponse.json({ message: 'Servicios no encontrados', status: 404 });
+
+    return NextResponse.json({ message: 'Servicios encontrados correctamente', service: servicesFound ,  status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     });
 
     if (userFound) {
-      return NextResponse.json({ message: 'User already exists', status: 400 });
+      return NextResponse.json({ message: 'User already exists', status: 404 });
     }
 
     // if (userFound) {

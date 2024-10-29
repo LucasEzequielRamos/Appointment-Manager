@@ -1,27 +1,28 @@
 "use client";
 
-import SignInGoogleButton from "@/Components/Buttons/SigninGoogleButton";
-import Link from "next/link";
 import useRegister from "@/hooks/useRegister";
 ("@/hooks/useRegister");
 
-const RegisterClientForm = () => {
+const UpdateClientForm = (data: any) => {
   const {
     errors,
     handleChange,
     handleSubmit,
-    formPostData,
+    formPutData,
     handleCoverageChange,
   } = useRegister({
-    apiUrl: "/api/register/client",
+    apiUrl: `/api/user/${data.id}`,
     userType: "client",
-    method: "POST",
+    method: "PUT",
+    data: data,
   });
+
+  console.log(formPutData);
 
   return (
     <div className="min-h-screen flex items-center justify-center text-black bg-gray-800">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Registro</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Cambio de datos</h2>
         <form onSubmit={handleSubmit} className="space-y-4 mb-2">
           <div>
             <label className="block text-sm font-medium">Nombre</label>
@@ -31,7 +32,7 @@ const RegisterClientForm = () => {
             <input
               type="text"
               name="first_name"
-              value={formPostData?.first_name}
+              value={formPutData?.first_name}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -44,54 +45,9 @@ const RegisterClientForm = () => {
             <input
               type="text"
               name="last_name"
-              value={formPostData?.last_name}
+              value={formPutData?.last_name}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">
-              Correo Electrónico*
-            </label>
-            {errors.email && <p className="text-red-700">{errors.email}</p>}
-            <input
-              type="email"
-              name="email"
-              value={formPostData?.email}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Contraseña*</label>
-            {errors.password && (
-              <p className="text-red-700">{errors.password}</p>
-            )}
-            <input
-              type="password"
-              name="password"
-              value={formPostData?.password}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">
-              Confirmar Contraseña*
-            </label>
-            {errors.confirm_password && (
-              <p className="text-red-700">{errors.confirm_password}</p>
-            )}
-            <input
-              type="password"
-              name="confirm_password"
-              value={formPostData?.confirm_password}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
             />
           </div>
           <div>
@@ -100,7 +56,7 @@ const RegisterClientForm = () => {
             <input
               type="text"
               name="address"
-              value={formPostData?.address}
+              value={formPutData?.address}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -111,7 +67,7 @@ const RegisterClientForm = () => {
             <input
               type="number"
               name="phone"
-              value={formPostData?.phone}
+              value={formPutData?.phone}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded appearance-none"
               maxLength={15}
@@ -123,12 +79,12 @@ const RegisterClientForm = () => {
             {errors.coverage && (
               <p className="text-red-700">{errors.coverage}</p>
             )}
-            {formPostData.coverage === "other" ? (
+            {formPutData.coverage === "other" ? (
               <div className="relative  ">
                 <input
                   type="text"
                   name="other_coverage"
-                  value={formPostData.other_coverage || ""}
+                  value={formPutData.other_coverage || ""}
                   onChange={handleChange}
                   placeholder="Especifique otra cobertura"
                   className="w-full p-2 max-h-[40px] border border-gray-300 rounded "
@@ -145,7 +101,7 @@ const RegisterClientForm = () => {
             ) : (
               <select
                 name="coverage"
-                value={formPostData.coverage}
+                value={formPutData.coverage}
                 onChange={handleChange}
                 className="w-full p-2 border min-h-[40px] border-gray-300 rounded"
               >
@@ -164,21 +120,12 @@ const RegisterClientForm = () => {
             type="submit"
             className="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
           >
-            Registrarse
+            Cambiar Datos
           </button>
         </form>
-        <SignInGoogleButton />
-        <div className="text-center mt-6">
-          <p className="text-gray-600">
-            ¿Ya tienes una cuenta?{" "}
-            <Link href="/auth/login" className="text-blue-500 hover:underline">
-              Inicia Sesion
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );
 };
 
-export default RegisterClientForm;
+export default UpdateClientForm;
