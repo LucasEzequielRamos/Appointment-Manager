@@ -7,7 +7,6 @@ function hoursToMinutes(hourString: string) {
   return  hours * 60 + minutes;
 }
 
-
 const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -163,9 +162,6 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
         [name]: value,
       });
     };
-    
-    console.log(formData)
-    console.log({availability})
 
     const handleChangeTimeSlots = (
       e: React.ChangeEvent<HTMLInputElement>,
@@ -225,7 +221,7 @@ const useRegister = ({apiUrl, userType}:{apiUrl?:string, userType?:string},) => 
       const data = await res.json();
       console.log(data, 'LOG EN HOOK')
     
-      if (data.status !== 200){
+      if (data.status !== 201){
         setErrors({api: data.message});
       } 
       if(data.message === 'Client user created successfully' && userType === 'client'){

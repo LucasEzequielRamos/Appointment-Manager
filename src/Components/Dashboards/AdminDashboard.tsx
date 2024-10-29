@@ -1,35 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { getAllUsers } from "@/utils/getUser";
+import useFetchData from "@/hooks/useFetchData";
 
 interface AdminDashboardProps {
   user: any;
-  // users: any[];
-  // services: any[];
-  // appointments: any[];
-  // professionals: any[];
 }
 
 const AdminDashboard = ({
   user,
-  // users,
-  // services,
-  // appointments,
-  // professionals,
 }: AdminDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("");
-  const [data, setData] = useState([]);
+  const [activeTab, setActiveTab] = useState<TabType | null >(null);
   
-  useEffect(() => {
-    if (activeTab === "usuarios") {
-      getAllUsers()
-       .then((users) => setData(users))
-    }
-    
-  }, [activeTab])
-  
+  const { data } = useFetchData(activeTab);
 
   return (
     <main>
@@ -57,93 +41,48 @@ const AdminDashboard = ({
         <h3 className="font-bold mt-4">Ver datos:</h3>
         <div className="flex space-x-4 border-b-2 pb-2 mb-4">
           <button
-            className={`px-4 py-2 ${
-              activeTab === "usuarios" ? "border-b-2 border-blue-500" : ""
-            }`}
-            onClick={() => setActiveTab("usuarios")}
-          >
+            className={`px-4 py-2 ${activeTab === "user" ? "border-b-2 border-blue-500" : ""
+              }`}
+            onClick={() => setActiveTab("user")}
+          > 
             Usuarios
           </button>
           <button
-            className={`px-4 py-2 ${
-              activeTab === "servicios" ? "border-b-2 border-blue-500" : ""
-            }`}
-            onClick={() => setActiveTab("servicios")}
+            className={`px-4 py-2 ${activeTab === "service" ? "border-b-2 border-blue-500" : ""
+              }`}
+            onClick={() => setActiveTab("service")}
           >
             Servicios
           </button>
           <button
-            className={`px-4 py-2 ${
-              activeTab === "turnos" ? "border-b-2 border-blue-500" : ""
-            }`}
-            onClick={() => setActiveTab("turnos")}
+            className={`px-4 py-2 ${activeTab === "appointment" ? "border-b-2 border-blue-500" : ""
+              }`}
+            onClick={() => setActiveTab("appointment")}
           >
             Turnos
           </button>
           <button
-            className={`px-4 py-2 ${
-              activeTab === "profesionales" ? "border-b-2 border-blue-500" : ""
-            }`}
-            onClick={() => setActiveTab("profesionales")}
+            className={`px-4 py-2 ${activeTab === "professional" ? "border-b-2 border-blue-500" : ""
+              }`}
+            onClick={() => setActiveTab("professional")}
           >
             Profesionales
           </button>
         </div>
 
-        {typeof data === "object" && (
-          <div>
-            {data.length > 1 ? (
-              data.map((user: any) => (
-                <div key={user.user_id}>
-                  {user.first_name} {user.last_name}
-                </div>
-              ))
-            ) : (
-              <p>No hay ningun usuario registrado</p>
-            )}
-          </div>
-        )}
+        {/* Receive and map an object with the activeTab data */}
+        <div>
+          {data[activeTab as TabType]?.length >= 1 ? (
+            data[activeTab as TabType].map((user: any) => (
+              <div key={user.user_id || user.id}>
+                {user.first_name} {user.last_name}
+              </div>
+            ))
+          ) : (
+            <p>No hay datos disponibles para esta pestaña.</p>
+          )}
+        </div>
 
-        {/* {activeTab === "servicios" && (
-          <div>
-            <h4 className="text-lg font-semibold">Servicios:</h4>
-            {services.length > 1 ? (
-              services.map((service: any) => (
-                <div key={service.id}>{service.name}</div>
-              ))
-            ) : (
-              <p>No hay ningun servicio registrad</p>
-            )}
-          </div>
-        )}
-
-        {activeTab === "turnos" && (
-          <div>
-            <h4 className="text-lg font-semibold">Turnos:</h4>
-            {appointments.length > 1 ? (
-              appointments.map((appointment: any) => (
-                <div key={appointment.id}>{appointment.date}</div>
-              ))
-            ) : (
-              <p>No hay ningun turno</p>
-            )}
-          </div>
-        )}
-
-        {activeTab === "profesionales" && (
-          <div>
-            <h4 className="text-lg font-semibold">Profesionales:</h4>
-            {professionals.length > 1 ? (
-              professionals.map((professional: any) => (
-                <div key={professional.id}>
-                  {professional.first_name} {professional.last_name}
-                </div>
-              ))
-            ) : (
-              <p>No hay ningun profesioal registrado</p>
-            )}
-          </div>
-        )} */}
       </div>
     </main>
   );

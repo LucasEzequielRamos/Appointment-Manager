@@ -101,3 +101,12 @@ interface Availability {
   day: string;
   time_slot: TimeSlot;
 }
+
+type TabType = "user" | "service" | "appointment" | "professional";
+
+interface DataState {
+  user: any[];
+  service: any[];
+  appointment: any[];
+  professional: any[];
+}

@@ -44,7 +44,7 @@ export async function POST (req: NextRequest) {
     });
 
 
-    return NextResponse.json({ message: 'Client user created successfully', user: newUser , status: 200 });
+    return NextResponse.json({ message: 'Client user created successfully', user: newUser , status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({

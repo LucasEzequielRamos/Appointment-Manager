@@ -30,11 +30,11 @@ export async function GET (req: NextRequest) {
     }
    
 
-    return NextResponse.json({ message: 'User found successfully', user: usersFound , status: 201 });
+    return NextResponse.json({ message: 'User found successfully', user: usersFound , status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
-      message: 'Error creating user',
+      message: 'Error getting user',
       error: error.message,
      status: 500 });
   }

@@ -4,6 +4,7 @@ import { comparePassword } from "@/utils/helpers";
 import db from "@/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Google from "next-auth/providers/google";
+import config from "./utils/config";
 
 declare module 'next-auth' {
   interface Session {
@@ -58,8 +59,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
     Google({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET,
+      clientId: config.GOOGLE_ID,
+      clientSecret: config.GOOGLE_SECRET,
       authorization: {
         params: {
           prompt: "consent",

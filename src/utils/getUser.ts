@@ -1,12 +1,12 @@
 import { auth } from "@/auth";
-const apiUrl = process.env.NEXT_API_URL || 'http://localhost:3000/api';
+import config from "./config";
 
 export async function getUserById(id: number): Promise<any> {
   try {
     const userData = await auth();
 
     if (userData !== undefined) {
-      const res = await fetch(`${apiUrl}/user/${id}`, {
+      const res = await fetch(`${config.NEXT_API_URL}/user/${id}`, {
         method: "GET",
       });
 
@@ -22,7 +22,7 @@ export async function getUserById(id: number): Promise<any> {
 
 export async function getAllUsers(): Promise<any> {
   try {
-    const res = await fetch(`${apiUrl}/user`, {
+    const res = await fetch(`${config.NEXT_API_URL}/user`, {
       method: "GET",
     });
 

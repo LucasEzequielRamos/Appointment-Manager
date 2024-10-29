@@ -1,13 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 
-
-
-
-
 export async function POST(req: NextRequest) {
   try {
-    const {  email, name, coverage,duration, availability  } = await req.json()
+    const {  email, name, coverage, duration, availability  } = await req.json()
 
     console.log(email, name, coverage,duration, availability, 'LOG EN API')
 
@@ -40,11 +36,11 @@ export async function POST(req: NextRequest) {
       });
 
 
-    return NextResponse.json({ message: 'Service added  successfully', user: newService ,  status: 200 });
+    return NextResponse.json({ message: 'Service added successfully', service: newService, status: 201 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
-      message: 'Error creating service user',
+      message: 'Error creating service',
       error: error.message,
       status: 500 });
   }
@@ -66,11 +62,11 @@ export async function GET(req: NextRequest) {
         
       });
 
-    return NextResponse.json({ message: 'Service added created successfully', user: servicesFound ,  status: 200 });
+    return NextResponse.json({ message: 'Services founded successfully', service: servicesFound ,  status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
-      message: 'Error creating professional user',
+      message: 'Error getting services',
       error: error.message,
       status: 500 });
   }

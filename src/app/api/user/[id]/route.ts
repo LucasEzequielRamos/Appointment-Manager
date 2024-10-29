@@ -34,7 +34,7 @@ export async function GET (req: NextRequest, {params}: {params:{id: number}}) {
     }
    
 
-    return NextResponse.json({ message: 'User found successfully', user: userFound, status: 201 });
+    return NextResponse.json({ message: 'User found successfully', user: userFound, status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({

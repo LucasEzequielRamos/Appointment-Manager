@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       {
         message: 'Admin user created successfully',
         user: newUser,
-      status: 200 }
+      status: 201 }
     );
   } catch (error: any) {
     console.error(error);
