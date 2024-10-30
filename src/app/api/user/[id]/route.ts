@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db'
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function GET (req: NextRequest, {params}: {params:{id: number}}) {
   try {
@@ -90,6 +91,8 @@ export async function PUT (req: NextRequest) {
       return NextResponse.json({ message: 'User not found', status: 404 });
     }
    
+    revalidateTag('user');
+    revalidatePath(`/dashboard/${data.user_id}`)
 
     return NextResponse.json({ message: 'User updated successfully', user: userUpdated, status: 200 });
   } catch (error: any) {

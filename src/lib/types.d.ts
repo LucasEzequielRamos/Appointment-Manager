@@ -102,11 +102,22 @@ interface Availability {
   time_slot: TimeSlot;
 }
 
-type TabType = "user" | "service" | "appointment" | "professional";
+type TabType = "user" | "service" | "appointment" | "professional" ;
 
 interface DataState {
   user: any[];
   service: any[];
   appointment: any[];
   professional: any[];
+}
+
+interface ProfessionalDashboardProps {
+  user: any;
+  appointments?: any[];
+  services?: any[];
+}
+
+interface ClientDashboardProps {
+  user: any;
+  appointments?: any[];
 }

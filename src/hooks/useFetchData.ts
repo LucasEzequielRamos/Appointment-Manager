@@ -1,7 +1,7 @@
 import config from "@/utils/config";
 import { useEffect, useState } from "react";
 
-const useFetchData = (tab : TabType | null) => {
+const useFetchData = (tab : TabType | null | "professionalData") => {
   const [data, setData] = useState<DataState>({
     user: [],
     service: [],
@@ -10,7 +10,7 @@ const useFetchData = (tab : TabType | null) => {
   });
 
   useEffect(() => {
-    if (tab === null) return
+    if (tab === null || tab=== 'professionalData') return
 
     const fetchData = async () => {
       try {

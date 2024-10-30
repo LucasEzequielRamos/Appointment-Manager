@@ -14,7 +14,7 @@ const RegisterServiceForm = () => {
     errors,
   } = useRegister({
     apiUrl: `/api/service`,
-    userType: "service",
+    userType: "SERVICE",
     method: "POST",
   });
 

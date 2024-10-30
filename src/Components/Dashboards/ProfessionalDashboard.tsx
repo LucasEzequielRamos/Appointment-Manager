@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
-interface ProfessionalDashboardProps {
-  user: any;
-  appointments?: any[];
-  services?: any[];
-}
+import UpdateForm from "../Forms/UpdateForm";
 
 const ProfessionalDashboard = ({
   user,
@@ -15,6 +10,7 @@ const ProfessionalDashboard = ({
   services,
 }: ProfessionalDashboardProps) => {
   const [activeTab, setActiveTab] = useState("appointments");
+  const [formView, setFormView] = useState(false);
 
   console.log({ user });
 
@@ -31,7 +27,10 @@ const ProfessionalDashboard = ({
             className={`px-4 py-2 ${
               activeTab === "appointments" ? "border-b-2 border-blue-500" : ""
             }`}
-            onClick={() => setActiveTab("appointments")}
+            onClick={() => {
+              setActiveTab("appointments");
+              setFormView(false);
+            }}
           >
             Ver Turnos Pendientes
           </button>
@@ -39,7 +38,10 @@ const ProfessionalDashboard = ({
             className={`px-4 py-2 ${
               activeTab === "services" ? "border-b-2 border-blue-500" : ""
             }`}
-            onClick={() => setActiveTab("services")}
+            onClick={() => {
+              setActiveTab("services");
+              setFormView(false);
+            }}
           >
             Ver Servicios
           </button>
@@ -49,7 +51,10 @@ const ProfessionalDashboard = ({
                 ? "border-b-2 border-blue-500"
                 : ""
             }`}
-            onClick={() => setActiveTab("professionalData")}
+            onClick={() => {
+              setActiveTab("professionalData");
+              setFormView(false);
+            }}
           >
             Ver Mis Datos
           </button>
@@ -108,13 +113,16 @@ const ProfessionalDashboard = ({
             <p>
               <strong>Email:</strong> {user.email}
             </p>
-            <Link href="/professional/profile">
-              <button className="mt-4 p-2 bg-blue-500 text-white rounded">
-                Ver/Actualizar Mis Datos
-              </button>
-            </Link>
+            <button
+              onClick={() => setFormView(!formView)}
+              className="mt-4 p-2 flex w-fit bg-blue-500 text-white rounded"
+            >
+              Ver/Actualizar Mis Datos
+            </button>
           </div>
         )}
+
+        {formView && <UpdateForm data={user} />}
       </div>
     </main>
   );

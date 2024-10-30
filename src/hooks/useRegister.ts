@@ -1,6 +1,5 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import React from 'react'
 
 function hoursToMinutes(hourString: string) {
   const [hours, minutes] = hourString.split(":").map(Number);
@@ -13,7 +12,7 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
     
 
     const [formPostData, setFormPostData ] = useState<formPostDataToRegister | any >(
-      userType === 'service'
+      userType === 'SERVICE'
       ?
       {
         email: "",
@@ -37,7 +36,7 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
     );
     
     const [formPutData, setFormPutData] = useState<formPostDataToRegister | any >(
-      userType === 'service'
+      userType === 'SERVICE'
       ?
       {
         email: data.email,
@@ -46,20 +45,27 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
         coverage: data.coverage,
       }
       :
+      userType === 'CLIENT'
+      ?
       {
-        email:data.data.email  ,
-        // password:data.data.password ,
-        // confirm_password:data.data.confirm_password,
-        first_name:data.data.first_name  ,
-        last_name:data.data.last_name  ,
-        address:data.data.client.address ,
-        phone:data.data.client.phone ,
-        coverage:data.data.client.coverage ,
-        other_coverage:data.data.client.other_coverage ,
+        email:data.email  ,
+        // password:data.password ,
+        // confirm_password:data.confirm_password,
+        first_name:data.first_name  ,
+        last_name:data.last_name  ,
+        address:data.client.address ,
+        phone:data.client.phone ,
+        coverage:data.client.coverage ,
+        other_coverage:data.client.other_coverage ,
+      }
+      :
+      {
+        first_name:data.first_name,
+        last_name:data.last_name,
+        
       }
     )
 
-    console.log(formPutData)
 
     const [errors, setErrors] = useState<ErrorsformPostData >({
       
@@ -70,7 +76,7 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
   const validateFormPut = () => {
     const newErrors: typeof errors = {};
 
-    if(userType !== 'service'){
+    if(userType !== 'SERVICE'){
       if (!formPutData.first_name || formPutData.first_name.length < 2) {
         newErrors.first_name = "El nombre debe contener al menos 2 caracteres.";
       }
@@ -158,7 +164,7 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
         if (!formPutData.email || !emailPattern.test(formPostData.email)) {
           newErrors.email = "Email inválido";
         }
-        if(userType !== 'service'){
+        if(userType !== 'SERVICE'){
           if (!formPostData.first_name || formPostData.first_name.length < 2 && !formPutData.first_name || formPutData.first_name.length < 2) {
             console.log(formPutData.first_name.length)
             newErrors.first_name = "El nombre debe contener al menos 2 caracteres.";
@@ -326,7 +332,7 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
       }
     
 
-      const valuesToPost = userType === 'service'  ?{
+      const valuesToPost = userType === 'SERVICE'  ?{
         ...formPostData,
         availability
       }:
@@ -334,7 +340,7 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
       ...formPostData
       }
 
-      const valuesToPut = userType === 'service'  ?{
+      const valuesToPut = userType === 'SERVICE'  ?{
         ...formPutData,
         availability,
         role: data.role,
@@ -343,8 +349,8 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
       :
       {
       ...formPutData,
-      role: data.data.role,
-      user_id: data.data.user_id
+      role: data.role,
+      user_id: data.user_id
       
       }
 
@@ -358,16 +364,16 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
         body:  JSON.stringify(method ===' POST' ? valuesToPost : valuesToPut),
       });
       const dataFetch = await res.json();
-      console.log(dataFetch, 'LOG EN HOOK AAAAAAAA')
+      // console.log(dataFetch, 'LOG EN HOOK AAAAAAAA')
     
       if (dataFetch.status !== 201){
         setErrors({api: data.message});
       } 
-      if(dataFetch.message === 'Client user created successfully' && userType === 'client'){
-        router.push('/auth/login')
-      }
+      // if(dataFetch.message === 'Client user created successfully' && userType === 'client'){
+      //   router.push('/auth/login')
+      // }
     
-      setFormPostData(userType === 'service' 
+      setFormPostData(userType === 'SERVICE' 
         ?
           {
             email: "",

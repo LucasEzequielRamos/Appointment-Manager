@@ -4,8 +4,9 @@ import useRegister from "@/hooks/useRegister";
 
 const AdminRegisterForm = ({ role }: { role: string }) => {
   const { errors, handleChange, handleSubmit, formPostData } = useRegister({
-    apiUrl: `/api/register/${role}`,
+    apiUrl: `/api/register/${role.toLowerCase()}`,
     userType: role,
+    method: "POST",
   });
 
   return (

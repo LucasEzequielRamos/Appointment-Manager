@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import UpdateClientForm from "../Forms/UpdateClientForm";
-
-interface ClientDashboardProps {
-  user: any;
-  appointments?: any[];
-}
+import UpdateForm from "../Forms/UpdateForm";
 
 const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
   const [activeTab, setActiveTab] = useState("myAppointments");
@@ -26,7 +21,10 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
             className={`px-4 py-2 ${
               activeTab === "myAppointments" ? "border-b-2 border-blue-500" : ""
             }`}
-            onClick={() => setActiveTab("myAppointments")}
+            onClick={() => {
+              setActiveTab("myAppointments");
+              setFormView(false);
+            }}
           >
             Ver Mis Turnos
           </button>
@@ -34,7 +32,10 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
             className={`px-4 py-2 ${
               activeTab === "newAppointment" ? "border-b-2 border-blue-500" : ""
             }`}
-            onClick={() => setActiveTab("newAppointment")}
+            onClick={() => {
+              setActiveTab("newAppointment");
+              setFormView(false);
+            }}
           >
             Sacar Nuevo Turno
           </button>
@@ -42,7 +43,10 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
             className={`px-4 py-2 ${
               activeTab === "misDatos" ? "border-b-2 border-blue-500" : ""
             }`}
-            onClick={() => setActiveTab("misDatos")}
+            onClick={() => {
+              setActiveTab("misDatos");
+              setFormView(false);
+            }}
           >
             Ver Mis Datos
           </button>
@@ -86,7 +90,7 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
 
         {/* Tab for Viewing User Data */}
         {activeTab === "misDatos" && (
-          <div>
+          <div className="flex flex-col w-fit">
             <h4 className="text-lg font-semibold">Mis Datos:</h4>
             <p>
               <strong>Nombre:</strong> {user.first_name}
@@ -108,14 +112,13 @@ const ClientDashboard = ({ user, appointments }: ClientDashboardProps) => {
             </p>
             <button
               onClick={() => setFormView(!formView)}
-              className="mt-4 p-2 bg-blue-500 text-white rounded"
+              className="mt-4 p-2 flex w-fit bg-blue-500 text-white rounded"
             >
               Ver/Actualizar Mis Datos
             </button>
           </div>
         )}
-
-        {formView && <UpdateClientForm data={user} />}
+        {formView && <UpdateForm data={user} />}
       </div>
     </main>
   );
