@@ -5,7 +5,11 @@ import Link from "next/link";
 import useRegister from "@/hooks/useRegister";
 ("@/hooks/useRegister");
 
-const RegisterClientForm = () => {
+const RegisterClientForm = ({
+  registratorRole,
+}: {
+  registratorRole?: string | undefined;
+}) => {
   const {
     errors,
     handleChange,
@@ -16,6 +20,7 @@ const RegisterClientForm = () => {
     apiUrl: "/api/register/client",
     userType: "client",
     method: "POST",
+    registratorRole: registratorRole,
   });
 
   return (

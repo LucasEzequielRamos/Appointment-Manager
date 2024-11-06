@@ -6,65 +6,73 @@ function hoursToMinutes(hourString: string) {
   return  hours * 60 + minutes;
 }
 
-const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?:string,  method:string, data?: any},) => {
+const useRegister = ({apiUrl, userType, method, data, registratorRole}:{apiUrl?:string, userType:string,  method:string, data?: any,registratorRole?:string},) => {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    
 
-    const [formPostData, setFormPostData ] = useState<formPostDataToRegister | any >(
-      userType === 'SERVICE'
-      ?
-      {
-        email: "",
-        name: "",
-        duration: "",
-        coverage: "",
+    
+    const searchParams = useSearchParams();
+
+    function getInitialFormPostData(userType: string, searchParams: URLSearchParams) {
+      if (userType === 'SERVICE') {
+        return {
+          email: "",
+          name: "",
+          duration: "",
+          coverage: "",
+        };
+      } else {
+        return {
+          email: searchParams?.get("email") || "",
+          password: "",
+          confirm_password: "",
+          first_name: searchParams?.get("first_name") || "",
+          last_name: searchParams?.get("last_name") || "",
+          address: "",
+          phone: "",
+          coverage: "",
+          other_coverage: "",
+        };
       }
-      :
-      {
-        email: searchParams?.get("email") || "",
-        password: "",
-        confirm_password:"",
-        first_name: searchParams?.get("first_name") || "",
-        last_name: searchParams?.get("last_name") || "",
-        address: "",
-        phone: "",
-        coverage: "",
-        other_coverage: "",
+    }
+    
+    function getInitialFormPutData(userType: string, method: string, data: any) {
+      if(method === "PUT"){
+
+       if (userType === 'SERVICE') {
+        return {
+          email: data.email,
+          name: data.name,
+          duration: data.duration,
+          coverage: data.coverage,
+        };
+      } else if (userType === 'CLIENT') {
+        return {
+          email: data.email,
+          // password: data.password,
+          // confirm_password: data.confirm_password,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          address: data.client.address,
+          phone: data.client.phone,
+          coverage: data.client.coverage,
+          other_coverage: data.client.other_coverage,
+        };
+      } else {
+        return {
+          first_name: data.first_name,
+          last_name: data.last_name,
+        };
       }
-      
+    }
+    }
+    
+    const [formPostData, setFormPostData] = useState<formPostDataToRegister | any>(
+      getInitialFormPostData(userType, searchParams)
     );
     
-    const [formPutData, setFormPutData] = useState<formPostDataToRegister | any >(
-      userType === 'SERVICE'
-      ?
-      {
-        email: data.email,
-        name: data.name,
-        duration: data.duration,
-        coverage: data.coverage,
-      }
-      :
-      userType === 'CLIENT'
-      ?
-      {
-        email:data.email  ,
-        // password:data.password ,
-        // confirm_password:data.confirm_password,
-        first_name:data.first_name  ,
-        last_name:data.last_name  ,
-        address:data.client.address ,
-        phone:data.client.phone ,
-        coverage:data.client.coverage ,
-        other_coverage:data.client.other_coverage ,
-      }
-      :
-      {
-        first_name:data.first_name,
-        last_name:data.last_name,
-        
-      }
-    )
+    const [formPutData, setFormPutData] = useState<formPostDataToRegister | any>(
+      getInitialFormPutData(userType, method, data)
+    );
 
 
     const [errors, setErrors] = useState<ErrorsformPostData >({
@@ -330,32 +338,35 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
       }else{
         if(!validateFormPut()) return
       }
-    
 
-      const valuesToPost = userType === 'SERVICE'  ?{
+      let valuesToPost
+    
+      if(method ==='POST'){
+       valuesToPost = userType === 'SERVICE'  ?{
         ...formPostData,
         availability
       }:
       {
       ...formPostData
       }
+    }
+      let valuesToPut
 
-      const valuesToPut = userType === 'SERVICE'  ?{
+      if(method ==='PUT'){
+       valuesToPut = userType === 'SERVICE'  ?{
+          ...formPutData,
+          availability,
+          role: data.role,
+          user_id: data.user_id
+        }
+        :
+        {
         ...formPutData,
-        availability,
         role: data.role,
         user_id: data.user_id
+        
+        }
       }
-      :
-      {
-      ...formPutData,
-      role: data.role,
-      user_id: data.user_id
-      
-      }
-
-      console.log(valuesToPut)
-
 
     
       const res = await fetch(`${apiUrl}`, {
@@ -370,9 +381,9 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
       if (dataFetch.status !== 201){
         setErrors({api: data.message});
       } 
-      // if(dataFetch.message === 'Client user created successfully' && userType === 'client'){
-      //   router.push('/auth/login')
-      // }
+      if(dataFetch.message === 'Client user created successfully' && registratorRole === 'CLIENT'){
+        router.push('/auth/login')
+      }
     
       setFormPostData(userType === 'SERVICE' 
         ?

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db'
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { auth } from '@/auth';
 
 export async function GET (req: NextRequest, {params}: {params:{id: number}}) {
   try {
@@ -103,7 +104,14 @@ export async function PUT (req: NextRequest) {
 
 export async function DELETE (req: NextRequest){
   try { 
+
+    const userSessionData = await auth()
     const user_id = await req.json()
+
+    if (!userSessionData) return NextResponse.json({ message: 'Session not found', status: 404 });
+
+
+    if( userSessionData.user.id !== user_id && userSessionData.user.role !== 'ADMIN') return NextResponse.json({ message: 'You don`t have permission', status: 401 });
 
     const userDeleted = await db.user.delete({        
       where: { user_id: user_id },

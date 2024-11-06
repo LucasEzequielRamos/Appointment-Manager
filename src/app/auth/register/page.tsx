@@ -8,9 +8,9 @@ const page = async () => {
 
   if (session && session?.user?.role !== "ADMIN") redirect("/home");
   return (
-    <div>
-      <RegisterClientForm />
-    </div>
+    <>
+      <RegisterClientForm registratorRole={session?.user.role} />
+    </>
   );
 };
 
