@@ -46,10 +46,7 @@ export async function GET (req: NextRequest, {params}: {params:{id: number}}) {
 }
 export async function PUT (req: NextRequest) {
   try { 
-
     const data = await req.json()
-
-    
 
     const userUpdated = await db.user.update({        
       where: { user_id: data.user_id },
@@ -95,6 +92,51 @@ export async function PUT (req: NextRequest) {
     revalidatePath(`/dashboard/${data.user_id}`)
 
     return NextResponse.json({ message: 'User updated successfully', user: userUpdated, status: 200 });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({
+      message: 'Error updating user',
+      error: error.message,
+     status: 500 });
+  }
+}
+
+export async function DELETE (req: NextRequest){
+  try { 
+    const user_id = await req.json()
+
+    const userDeleted = await db.user.delete({        
+      where: { user_id: user_id },
+      include:{
+        client: true,
+        professional:{
+          include:{
+            services:{
+              include:{
+                availability:{
+                  include:{
+                    time_slot: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+  
+      
+    });
+
+
+
+    if (!userDeleted) {
+      return NextResponse.json({ message: 'User not found', status: 404 });
+    }
+   
+    revalidateTag('user');
+    revalidatePath(`/dashboard/${user_id}`)
+
+    return NextResponse.json({ message: 'User deleted successfully', user: userDeleted, status: 200 });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({

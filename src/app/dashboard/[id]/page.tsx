@@ -2,8 +2,12 @@ import { getUserById } from "@/utils/getUser";
 import AdminDashboard from "@/Components/Dashboards/AdminDashboard";
 import ClientDashboard from "@/Components/Dashboards/ClientDashboard";
 import ProfessionalDashboard from "@/Components/Dashboards/ProfessionalDashboard";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 const page = async ({ params }: { params: { id: number } }) => {
+  const session = await auth();
+  if (!session) redirect("/");
   const user = await getUserById(params.id);
 
   if (!user) {

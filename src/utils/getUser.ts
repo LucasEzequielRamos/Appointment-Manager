@@ -4,6 +4,7 @@ import config from "./config";
 export async function getUserById(id: number): Promise<any> {
   try {
     const userData = await auth();
+    console.log(userData)
 
     if (userData !== undefined) {
       const res = await fetch(`${config.NEXT_API_URL}/user/${id}`, {
@@ -28,6 +29,23 @@ export async function getAllUsers(): Promise<any> {
 
     const { user: usersList } = await res.json();
     return usersList;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function deleteUserById(id: number): Promise<any> {
+  try {
+    const userData = await auth()
+    console.log({userData})
+
+      // const res = await fetch(`${config.NEXT_API_URL}/user/${id}`, {
+      //   method: "DELETE",
+      //   body: JSON.stringify(id)
+      // });
+
+      // const message = await res.json();
+      // return message;
   } catch (error) {
     console.log(error);
   }

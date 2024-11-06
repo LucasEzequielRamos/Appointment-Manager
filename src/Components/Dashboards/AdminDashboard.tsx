@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import useFetchData from "@/hooks/useFetchData";
 import UpdateForm from "../Forms/UpdateForm";
+import { deleteUserById } from "@/utils/getUser";
 
 interface AdminDashboardProps {
   user: any;
@@ -14,9 +15,6 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
     TabType | null | "professionalData"
   >(null);
   const [formView, setFormView] = useState<boolean | number>(false);
-
-  console.log(formView);
-
   const { data } = useFetchData(activeTab);
 
   return (
@@ -123,6 +121,12 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                   Editar
                 </button>
                 {formView === user.user_id && <UpdateForm data={user} />}
+                <button
+                  onClick={async () => await deleteUserById(user.user_id)}
+                >
+                  {" "}
+                  Eliminar
+                </button>
               </div>
             ))
           ) : (

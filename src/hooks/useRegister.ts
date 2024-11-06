@@ -354,6 +354,8 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
       
       }
 
+      console.log(valuesToPut)
+
 
     
       const res = await fetch(`${apiUrl}`, {
@@ -361,10 +363,9 @@ const useRegister = ({apiUrl, userType, method, data}:{apiUrl?:string, userType?
         headers: {
           "Content-Type": "application/json",
         },
-        body:  JSON.stringify(method ===' POST' ? valuesToPost : valuesToPut),
+        body:  JSON.stringify(method === 'POST' ? valuesToPost : valuesToPut),
       });
       const dataFetch = await res.json();
-      // console.log(dataFetch, 'LOG EN HOOK AAAAAAAA')
     
       if (dataFetch.status !== 201){
         setErrors({api: data.message});
