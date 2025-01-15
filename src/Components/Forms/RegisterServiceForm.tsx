@@ -1,14 +1,15 @@
 "use client";
 
+import React, { useState } from "react";
 import useRegister from "@/hooks/useRegister";
 import { arrDays } from "@/lib/mock";
-// import { hoursToMinutes } from "@/utils/helpers";
+import ModalButton from "../Buttons/ModalButton";
 
 const RegisterServiceForm = () => {
   const {
     handleChange,
     formPostData,
-    handleSubmit,
+    handleSubmit: handleFormSubmit,
     handleChangeTimeSlots,
     availability,
     errors,
@@ -18,9 +19,41 @@ const RegisterServiceForm = () => {
     method: "POST",
   });
 
+  // Modal status
+  const [modalFeedback, setModalFeedback] = useState({
+    title: "Procesando...",
+    body: "Estamos procesando tu solicitud. Por favor, espera.",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      // Update the modal message while we wait for the response
+      setModalFeedback({
+        title: "Procesando...",
+        body: "Estamos procesando tu solicitud. Por favor, espera.",
+      });
+
+      await handleFormSubmit(e);
+
+      // If the form was submitted successfully, update the modal with the success message
+      setModalFeedback({
+        title: "¡Éxito!",
+        body: "El formulario se envió correctamente. Gracias por tu registro.",
+      });
+    } catch (error) {
+      // In case of error, update the modal with the error message
+      setModalFeedback({
+        title: "Error",
+        body: "Hubo un problema al enviar el formulario. Por favor, intenta nuevamente.",
+      });
+    }
+  };
+
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleFormSubmit}
       className="form-control my-10 mx-auto p-10 border border-accent-200 rounded md:w-1/3"
     >
       {errors.api && <p className="text-red-700">{errors.api}</p>}
@@ -151,9 +184,15 @@ const RegisterServiceForm = () => {
               />
             </div>
           </div>
+
+          <ModalButton
+            buttonLabel="Enviar"
+            modalTitle={modalFeedback.title}
+            modalBody={modalFeedback.body}
+            onPrimaryAction={handleSubmit}
+          />
         </div>
       ))}
-      <button type="submit">Enviar</button>
     </form>
   );
 };

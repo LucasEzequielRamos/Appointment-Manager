@@ -3,11 +3,11 @@ import db from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   try {
-    const professionalsFound = await db.user.findMany({
-      where: { role: "PROFESSIONAL" },
+    const appointmentsFound = await db.appointment.findMany({
       include: {
         professional: {
           include: {
+            user: true,
             services: {
               include: {
                 availability: {
@@ -22,19 +22,19 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    if (!professionalsFound) {
-      return NextResponse.json({ message: "No users found", status: 404 });
+    if (!appointmentsFound) {
+      return NextResponse.json({ message: "No appointments found", status: 404 });
     }
 
     return NextResponse.json({
-      message: "Professionals successfully found",
-      professional: professionalsFound,
+      message: "Appointments successfully found",
+      appointment: appointmentsFound,
       status: 200,
     });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({
-      message: "Error getting professionals",
+      message: "Error getting appointments",
       error: error.message,
       status: 500,
     });
