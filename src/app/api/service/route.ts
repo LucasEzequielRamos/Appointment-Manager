@@ -5,8 +5,6 @@ export async function POST(req: NextRequest) {
   try {
     const {  email, name, coverage, duration, availability  } = await req.json()
 
-    console.log(email, name, coverage,duration, availability, 'LOG EN API')
-
     if (!email|| !name|| !coverage||!duration|| !availability ) {
       return NextResponse.json({ message: 'Todos los campos son obligatorios.' , status:400});
     }
@@ -14,7 +12,6 @@ export async function POST(req: NextRequest) {
     const userFound = await db.user.findUnique({
       where: { email: email },
     });
-    console.log(userFound , 'LOG EN API')
    
     if(!userFound || userFound.role !== 'PROFESSIONAL'){
         return NextResponse.json({ message: 'No existe un usuario profesional con ese correo electronico', status: 404})

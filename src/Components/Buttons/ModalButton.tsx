@@ -1,19 +1,35 @@
+'use client'
 import React from "react";
 
 interface ModalButtonProps {
-  buttonLabel: string;
+  modalId: string;
+  status: 'open' | 'closed';
   modalTitle: string;
   modalBody: string | React.ReactNode;
-  onPrimaryAction?: (...args: any[]) => Promise<void>; // Callback asíncrono
+  labelPrimaryBtn?: string;
+  onPrimaryAction?: (...args: any[]) => void; 
+  labelSecondaryBtn?: string;
+  onSecondaryAction?: (...args: any[]) => void;
 }
 
 const ModalButton: React.FC<ModalButtonProps> = ({
-  buttonLabel,
+  modalId,
+  status,
   modalTitle,
   modalBody,
+  labelPrimaryBtn,
   onPrimaryAction,
+  labelSecondaryBtn,
+  onSecondaryAction,
 }) => {
-  const modalId = `modal_${Math.random().toString(36).slice(2, 11)}`;
+  React.useEffect(() => {
+    console.log('status', status);
+    if (status === 'open') {
+      openModal();
+    } else {
+      closeModal();
+    }
+  }, [status]);
 
   const openModal = () => {
     const modal = document.getElementById(modalId) as HTMLDialogElement;
@@ -31,33 +47,35 @@ const ModalButton: React.FC<ModalButtonProps> = ({
 
   const handlePrimaryAction = async (...args: any[]) => {
     if (onPrimaryAction) {
-      await onPrimaryAction(...args); 
+      await onPrimaryAction(...args);
     }
   };
 
   return (
-    <>
-      <button className="btn" onClick={openModal}>
-        {buttonLabel}
-      </button>
-      <dialog id={modalId} className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">{modalTitle}</h3>
-          <div className="py-4">{modalBody}</div>
-          <div className="modal-action">
+    <dialog id={modalId} className="modal">
+      <div className="modal-box">
+        <h3 className="font-bold text-lg">{modalTitle}</h3>
+        <div className="py-4">{modalBody}</div>
+        <div className="modal-action">
+          <button
+            className="btn btn-primary"
+            onClick={handlePrimaryAction}
+          >
+            {labelPrimaryBtn}
+          </button>
+          {labelSecondaryBtn && (
             <button
-              className="btn btn-primary"
-              onClick={handlePrimaryAction} 
+              className="btn btn-secondary"
+              onClick={onSecondaryAction}
             >
-              Aceptar
+              {labelSecondaryBtn}
             </button>
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={closeModal}>✕</button>
-          </div>
+          )}
+          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={closeModal}>✕</button>
         </div>
-      </dialog>
-    </>
+      </div>
+    </dialog>
   );
 };
 
 export default ModalButton;
- 

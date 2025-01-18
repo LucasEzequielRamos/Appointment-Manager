@@ -1,51 +1,44 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import {
+  validateFormPostUsers,
+  validateFormPutUsers,
+} from "@/utils/validations";
 
-function hoursToMinutes(hourString: string) {
-  const [hours, minutes] = hourString.split(":").map(Number);
-  return  hours * 60 + minutes;
-}
+const useRegister = ({
+  apiUrl,
+  userType,
+  method,
+  data,
+  registratorRole,
+}: {
+  apiUrl?: string;
+  userType: string;
+  method: string;
+  data?: any;
+  registratorRole?: string;
+}) => {
+  const router = useRouter();
 
-const useRegister = ({apiUrl, userType, method, data, registratorRole}:{apiUrl?:string, userType:string,  method:string, data?: any,registratorRole?:string},) => {
-    const router = useRouter();
+  const searchParams = useSearchParams();
 
-    
-    const searchParams = useSearchParams();
+  function getInitialFormPostData(searchParams: URLSearchParams) {
+    return {
+      email: searchParams?.get("email") || "",
+      password: "",
+      confirm_password: "",
+      first_name: searchParams?.get("first_name") || "",
+      last_name: searchParams?.get("last_name") || "",
+      address: "",
+      phone: "",
+      coverage: "",
+      other_coverage: "",
+    };
+  }
 
-    function getInitialFormPostData(userType: string, searchParams: URLSearchParams) {
-      if (userType === 'SERVICE') {
-        return {
-          email: "",
-          name: "",
-          duration: "",
-          coverage: "",
-        };
-      } else {
-        return {
-          email: searchParams?.get("email") || "",
-          password: "",
-          confirm_password: "",
-          first_name: searchParams?.get("first_name") || "",
-          last_name: searchParams?.get("last_name") || "",
-          address: "",
-          phone: "",
-          coverage: "",
-          other_coverage: "",
-        };
-      }
-    }
-    
-    function getInitialFormPutData(userType: string, method: string, data: any) {
-      if(method === "PUT"){
-
-       if (userType === 'SERVICE') {
-        return {
-          email: data.email,
-          name: data.name,
-          duration: data.duration,
-          coverage: data.coverage,
-        };
-      } else if (userType === 'CLIENT') {
+  function getInitialFormPutData(userType: string, method: string, data: any) {
+    if (method === "PUT") {
+      if (userType === "CLIENT") {
         return {
           email: data.email,
           // password: data.password,
@@ -64,364 +57,135 @@ const useRegister = ({apiUrl, userType, method, data, registratorRole}:{apiUrl?:
         };
       }
     }
-    }
-    
-    const [formPostData, setFormPostData] = useState<formPostDataToRegister | any>(
-      getInitialFormPostData(userType, searchParams)
-    );
-    
-    const [formPutData, setFormPutData] = useState<formPostDataToRegister | any>(
-      getInitialFormPutData(userType, method, data)
-    );
+  }
 
+  const [formPostData, setFormPostData] = useState<
+    formPostDataToRegister | any
+  >(getInitialFormPostData(searchParams));
 
-    const [errors, setErrors] = useState<ErrorsformPostData >({
-      
-    });
+  const [formPutData, setFormPutData] = useState<formPostDataToRegister | any>(
+    getInitialFormPutData(userType, method, data)
+  );
 
-  const [availability, setAvailability] = useState<Availability[]>([]);
+  const [errors, setErrors] = useState<ErrorsFormPostData>({});
 
-  const validateFormPut = () => {
-    const newErrors: typeof errors = {};
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+    if (name === "phone" && value.length > 15) return;
 
-    if(userType !== 'SERVICE'){
-      if (!formPutData.first_name || formPutData.first_name.length < 2) {
-        newErrors.first_name = "El nombre debe contener al menos 2 caracteres.";
-      }
-  
-      if (!formPutData.last_name || formPutData.last_name.length < 2) {
-        newErrors.last_name = "El apellido debe contener al menos 2 caracteres.";
-      }     
-      
-      // if (formPutData.password && formPutData.password.length < 8) {
-      //   newErrors.password = "La contraseña debe contener al menos 8 caracteres";
-      // }
-      
-      // if (formPostData.password !== formPostData.confirm_password) {
-      //   newErrors.confirm_password = "Las contraseñas no coinciden";
-      // }
-      
-      if(userType === 'client'){
-        if (!formPutData.address || formPutData.address.length < 2) {
-          newErrors.address = "Debe escribir su direccion";
-        }
-        if (!formPutData.phone || formPutData.phone.length < 2) {
-          newErrors.phone = "Debe escribir su numero de contacto";
-        }
-        if (!formPutData.coverage  && !formPutData.other_coverage ) {
-          newErrors.coverage = "Debe seleccionar una cobertura";
-        }
-      }
-    }else{          
-      if (!formPutData.name) {
-        newErrors.name = "Debe seleccionar un servicio";
-      }
-
-      if (!formPutData.coverage) {
-        newErrors.coverage = "Debe seleccionar una cobertura";
-      }
-
-      if (!formPutData.duration) {
-        newErrors.duration = "Debe marcar una duracion del servicio";
-      }
-
-      if (availability.length === 0) {
-        newErrors.availability = "Debes seleccionar al menos un día.";
-      } else if (availability.length >= 1) {
-        let tsFull = true; // Time Slot Full
-        let totalTime = 0;
-        availability.forEach(ts => {
-          if (ts.time_slot.start_time === "") {
-            tsFull = false;
-            return;
-          }
-          if (ts.time_slot.end_time === "") {
-            tsFull = false;
-            console.log("hola");
-            return;
-          }
-          const startMinutes = hoursToMinutes(ts.time_slot.start_time);
-          const endMinutes = hoursToMinutes(ts.time_slot.end_time);
-      
-          let duration = endMinutes >= startMinutes 
-            ? endMinutes - startMinutes 
-            : (24 * 60) - startMinutes + endMinutes; 
-      
-          totalTime += duration;
-          if (Number(formPutData.duration) > totalTime) {
-            console.log(totalTime, Number(formPutData.duration));
-            newErrors.availability =
-              "El horario es mas corto que la duracion del servicio";
-          }
-        });
-        if (!tsFull) {
-          newErrors.availability = "Horarios mal seleccionados";
-        }
-      }
-    }
-   
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateFormPost = () => {
-        const newErrors: typeof errors = {};
-
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!formPutData.email || !emailPattern.test(formPostData.email)) {
-          newErrors.email = "Email inválido";
-        }
-        if(userType !== 'SERVICE'){
-          if (!formPostData.first_name || formPostData.first_name.length < 2 && !formPutData.first_name || formPutData.first_name.length < 2) {
-            console.log(formPutData.first_name.length)
-            newErrors.first_name = "El nombre debe contener al menos 2 caracteres.";
-          }
-      
-          if (!formPostData.last_name || formPostData.last_name.length < 2 && !formPutData.last_name || formPutData.last_name.length < 2) {
-            newErrors.last_name = "El apellido debe contener al menos 2 caracteres.";
-          }
-          
-          
-          if (!formPostData.password || formPostData.password.length < 8 && !formPutData.password || formPutData.password.length < 8) {
-            newErrors.password = "La contraseña debe contener al menos 8 caracteres";
-          }
-          
-          if (formPostData.password !== formPostData.confirm_password) {
-            newErrors.confirm_password = "Las contraseñas no coinciden";
-          }
-          
-          if(userType === 'client'){
-            if (!formPostData.address || formPostData.address.length < 2) {
-              newErrors.address = "Debe escribir su direccion";
-            }
-            if (!formPostData.phone || formPostData.phone.length < 2) {
-              newErrors.phone = "Debe escribir su numero de contacto";
-            }
-            if (!formPostData.coverage  && !formPostData.other_coverage ) {
-              newErrors.coverage = "Debe seleccionar una cobertura";
-            }
-          }
-        }else{          
-          if (!formPostData.name) {
-            newErrors.name = "Debe seleccionar un servicio";
-          }
-
-          if (!formPostData.coverage) {
-            newErrors.coverage = "Debe seleccionar una cobertura";
-          }
-
-          if (!formPostData.duration) {
-            newErrors.duration = "Debe marcar una duracion del servicio";
-          }
-
-          if (availability.length === 0) {
-            newErrors.availability = "Debes seleccionar al menos un día.";
-          } else if (availability.length >= 1) {
-            let tsFull = true; // Time Slot Full
-            let totalTime = 0;
-            availability.forEach(ts => {
-              if (ts.time_slot.start_time === "") {
-                tsFull = false;
-                return;
-              }
-              if (ts.time_slot.end_time === "") {
-                tsFull = false;
-                console.log("hola");
-                return;
-              }
-              const startMinutes = hoursToMinutes(ts.time_slot.start_time);
-              const endMinutes = hoursToMinutes(ts.time_slot.end_time);
-          
-              let duration = endMinutes >= startMinutes 
-                ? endMinutes - startMinutes 
-                : (24 * 60) - startMinutes + endMinutes; 
-          
-              totalTime += duration;
-              if (Number(formPostData.duration) > totalTime) {
-                console.log(totalTime, Number(formPostData.duration));
-                newErrors.availability =
-                  "El horario es mas corto que la duracion del servicio";
-              }
-            });
-            if (!tsFull) {
-              newErrors.availability = "Horarios mal seleccionados";
-            }
-          }
-        }
-       
-        
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-      };
-    
-    const handleChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,      
-    ) => {
-      const { name, value } = e.target;
-      if (name === "phone" && value.length > 15) return;
-    
-      if (name === "phone") {
-        setFormPostData({
-          ...formPostData,
-          [name]: value.toString(),
-        });
-        setFormPutData({
-          ...formPutData,
-          [name]: value.toString(),
-        });
-      }
-
-      if(e.target.type === "checkbox"){
-        if (e.target.checked) {
-          setAvailability(prev => [
-            ...prev,
-            { day: name, time_slot: { start_time: "", end_time: "" } },
-          ]);
-        } else {
-          setAvailability(prev => prev.filter(item => item.day !== name));
-        }
-      }
-
+    if (name === "phone") {
       setFormPostData({
         ...formPostData,
-        [name]: value,
+        [name]: value.toString(),
       });
       setFormPutData({
         ...formPutData,
-        [name]: value,
+        [name]: value.toString(),
       });
-    };
-
-    const handleChangeTimeSlots = (
-      e: React.ChangeEvent<HTMLInputElement>,
-      day: string
-    ) => {
-      const { id, value } = e.target;
-      const isStart = id.includes("StartTime");
-  
-      setAvailability(prevAvailability =>
-        prevAvailability.map(availabilityDay => {
-          if (availabilityDay.day === day) {
-            return {
-              ...availabilityDay,
-              time_slot: {
-                ...availabilityDay.time_slot,
-                start_time: isStart
-                  ? value
-                  : availabilityDay.time_slot.start_time,
-                end_time: !isStart ? value : availabilityDay.time_slot.end_time,
-              },
-            };
-          }
-          return availabilityDay;
-        })
-      );
-    };
-
-    const handleCoverageChange = (newCoverage: string) => {
-      setFormPostData((prevData: any) => ({
-        ...prevData,
-        coverage: newCoverage,
-      }));
-      setFormPutData((prevData: any) => ({
-        ...prevData,
-        coverage: newCoverage,
-      }));
-    };
-    
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      
-      if(method === 'POST'){
-        if(!validateFormPost()) return
-      }else{
-        if(!validateFormPut()) return
-      }
-
-      let valuesToPost
-    
-      if(method ==='POST'){
-       valuesToPost = userType === 'SERVICE'  ?{
-        ...formPostData,
-        availability
-      }:
-      {
-      ...formPostData
-      }
     }
-      let valuesToPut
 
-      if(method ==='PUT'){
-       valuesToPut = userType === 'SERVICE'  ?{
-          ...formPutData,
-          availability,
-          role: data.role,
-          user_id: data.user_id
-        }
-        :
-        {
+    setFormPostData({
+      ...formPostData,
+      [name]: value,
+    });
+    setFormPutData({
+      ...formPutData,
+      [name]: value,
+    });
+  };
+
+  const handleCoverageChange = (newCoverage: string) => {
+    setFormPostData((prevData: any) => ({
+      ...prevData,
+      coverage: newCoverage,
+    }));
+    setFormPutData((prevData: any) => ({
+      ...prevData,
+      coverage: newCoverage,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (method === "POST") {
+      if (!validateFormPostUsers(formPostData, userType, errors, setErrors))
+        return false; //!
+    } else {
+      let role = data.role;
+      if (!validateFormPutUsers(formPutData, role, errors, setErrors)) return;
+    }
+
+    let valuesToPost;
+
+    if (method === "POST") {
+      valuesToPost = { ...formPostData };
+    }
+
+    let valuesToPut;
+
+    if (method === "PUT") {
+      valuesToPut = {
         ...formPutData,
         role: data.role,
-        user_id: data.user_id
-        
-        }
-      }
+        user_id: data.user_id,
+      };
+    }
 
-    
-      const res = await fetch(`${apiUrl}`, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body:  JSON.stringify(method === 'POST' ? valuesToPost : valuesToPut),
-      });
-      const dataFetch = await res.json();
-    
-      if (dataFetch.status !== 201){
-        setErrors({api: data.message});
-      } 
-      if(dataFetch.message === 'Client user created successfully' && registratorRole === 'CLIENT'){
-        router.push('/auth/login')
-      }
-    
-      setFormPostData(userType === 'SERVICE' 
-        ?
-          {
+    const res = await fetch(`${apiUrl}`, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(method === "POST" ? valuesToPost : valuesToPut),
+    });
+    const dataFetch = await res.json();
+
+    if (dataFetch.status !== 201) {
+      setErrors({ api: dataFetch.message });
+    }
+    if (
+      dataFetch.message === "Client user created successfully" &&
+      registratorRole === "CLIENT"
+    ) {
+      router.push("/auth/login");
+    }
+
+    setFormPostData(
+      userType === "SERVICE"
+        ? {
             email: "",
             name: "",
             duration: "",
             coverage: "",
           }
-        :
-        {
-        email: searchParams?.get("email") || "",
-        password: "",
-        confirm_password:"",
-        first_name: searchParams?.get("first_name") || "",
-        last_name: searchParams?.get("last_name") || "",
-        address: "",
-        phone: "",
-        coverage: "",
-        other_coverage: "",
-      })
-      setAvailability([]),
-      (e.target as HTMLFormElement).reset();
-    };
-    
+        : {
+            email: searchParams?.get("email") || "",
+            password: "",
+            confirm_password: "",
+            first_name: searchParams?.get("first_name") || "",
+            last_name: searchParams?.get("last_name") || "",
+            address: "",
+            phone: "",
+            coverage: "",
+            other_coverage: "",
+          }
+    );
+    // (e.target as HTMLFormElement).reset();
+    return true; //!
+  };
+
   return {
     handleChange,
     handleSubmit,
     errors,
     formPostData,
     handleCoverageChange,
-    availability,
-    handleChangeTimeSlots,
-    formPutData
-  }
-}
+    formPutData,
+  };
+};
 
-export default useRegister
-
-
-
+export default useRegister;

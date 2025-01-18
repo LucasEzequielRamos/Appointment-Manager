@@ -47,7 +47,7 @@ interface formPostDataToRegister{
   other_coverage?: string ;
 }
 
-interface ErrorsformPostData{
+interface ErrorsFormPostData{
   api?: string
   name?: string;
     availability?: string;
