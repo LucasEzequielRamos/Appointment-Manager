@@ -77,16 +77,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async signOut(message : any) {
-      await db.session.delete({
+      console.log(message)
+      const sessiondeleted = await db.session.delete({
         where: { sessionToken: message.token.jti },
       })
+      console.log(sessiondeleted)
     }
   },
   callbacks: {
     async signIn({ account, profile, user }) {
       let userFound;
 
-      if (profile) { // if OAuth profile
+      if (profile) { 
         userFound = await db.user.findUnique({
           where: { email: profile?.email as string },
         });
@@ -150,7 +152,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if(dbSessions && dbSessions.length > 0){
         for (const dbSession of dbSessions) {
           if (new Date() > dbSession.expires) {
-
             const sessionExists = await db.session.findUnique({
               where: { sessionToken: dbSession.sessionToken },
             });
@@ -166,16 +167,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       }
      
+      console.log(token)
+
         const sessionFound = await db.session.findUnique({
           where: {sessionToken: token.id as string}
         })
 
 
-        if(!sessionFound){
-          await db.session.create({
-            data: {
-              user_id: token.user_id  as number,
-              sessionToken: token.id  as string,
+        if (!sessionFound) {
+          await db.session.upsert({
+            where: { sessionToken: token.id as string },
+            update: {}, 
+            create: {
+              user_id: token.user_id as number,
+              sessionToken: token.id as string,
               expires: new Date(session.expires),
             },
           });

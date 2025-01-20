@@ -128,42 +128,21 @@ const RegisterClientForm = ({
             {errors.coverage && (
               <p className="text-red-700">{errors.coverage}</p>
             )}
-            {formPostData.coverage === "other" ? (
-              <div className="relative  ">
-                <input
-                  type="text"
-                  name="other_coverage"
-                  value={formPostData.other_coverage || ""}
-                  onChange={handleChange}
-                  placeholder="Especifique otra cobertura"
-                  className="w-full p-2 max-h-[40px] border border-gray-300 rounded "
-                />
 
-                <button
-                  className="absolute 
-                  right-2 top-2 "
-                  onClick={() => handleCoverageChange("")}
-                >
-                  x
-                </button>
-              </div>
-            ) : (
-              <select
-                name="coverage"
-                value={formPostData.coverage}
-                onChange={handleChange}
-                className="w-full p-2 border min-h-[40px] border-gray-300 rounded"
-              >
-                <option disabled value="">
-                  Seleccione una opción
-                </option>
-                <option value="ninguna">Ninguna</option>
-                <option value="bronce">Bronce</option>
-                <option value="plata">Plata</option>
-                <option value="oro">Oro</option>
-                <option value="other">Otra (especificar)</option>
-              </select>
-            )}
+            <select
+              name="coverage"
+              value={formPostData.coverage}
+              onChange={handleChange}
+              className="w-full p-2 border min-h-[40px] border-gray-300 rounded"
+            >
+              <option disabled value="">
+                Seleccione una opción
+              </option>
+              <option value="ninguna">Ninguna</option>
+              <option value="bronce">Bronce</option>
+              <option value="plata">Plata</option>
+              <option value="oro">Oro</option>
+            </select>
           </div>
           <button
             type="submit"

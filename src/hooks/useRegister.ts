@@ -59,9 +59,9 @@ const useRegister = ({
     }
   }
 
-  const [formPostData, setFormPostData] = useState<
-    formPostDataToRegister | any
-  >(getInitialFormPostData(searchParams));
+  const [formPostData, setFormPostData] = useState<formPostDataToRegister | any>(
+    getInitialFormPostData(searchParams)
+  );
 
   const [formPutData, setFormPutData] = useState<formPostDataToRegister | any>(
     getInitialFormPutData(userType, method, data)
@@ -109,14 +109,14 @@ const useRegister = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+      e.preventDefault();
 
     if (method === "POST") {
       if (!validateFormPostUsers(formPostData, userType, errors, setErrors))
         return false; //!
     } else {
       let role = data.role;
-      if (!validateFormPutUsers(formPutData, role, errors, setErrors)) return;
+      if (!validateFormPutUsers(formPutData, role, errors, setErrors)) return false;
     }
 
     let valuesToPost;
@@ -146,23 +146,14 @@ const useRegister = ({
 
     if (dataFetch.status !== 201) {
       setErrors({ api: dataFetch.message });
-    }
-    if (
-      dataFetch.message === "Client user created successfully" &&
-      registratorRole === "CLIENT"
+    } else if (  
+      registratorRole !== "ADMIN"
     ) {
       router.push("/auth/login");
     }
 
     setFormPostData(
-      userType === "SERVICE"
-        ? {
-            email: "",
-            name: "",
-            duration: "",
-            coverage: "",
-          }
-        : {
+       {
             email: searchParams?.get("email") || "",
             password: "",
             confirm_password: "",
