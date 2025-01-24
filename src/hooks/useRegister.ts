@@ -59,11 +59,11 @@ const useRegister = ({
     }
   }
 
-  const [formPostData, setFormPostData] = useState<formPostDataToRegister | any>(
+  const [formPostData, setFormPostData] = useState<FormPostDataToRegister | any>(
     getInitialFormPostData(searchParams)
   );
 
-  const [formPutData, setFormPutData] = useState<formPostDataToRegister | any>(
+  const [formPutData, setFormPutData] = useState<FormPostDataToRegister | any>(
     getInitialFormPutData(userType, method, data)
   );
 
