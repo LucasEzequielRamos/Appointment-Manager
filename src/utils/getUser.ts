@@ -5,7 +5,6 @@ import { revalidateTag } from "next/cache";
 export async function getUserById(id: number): Promise<any> {
   try {
     const userData = await auth();
-    console.log(userData)
 
     if (userData !== undefined) {
       const res = await fetch(`${config.NEXT_API_URL}/user/${id}`, {

@@ -53,7 +53,6 @@ const RegisterServiceForm = () => {
   return (
     <>
       <form
-        // onSubmit={handleSubmit}
         onSubmit={handleFeedbackSubmit}
         className="form-control my-10 mx-auto p-10 border border-accent-200 rounded md:w-1/3"
       >

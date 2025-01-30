@@ -1,5 +1,4 @@
 import { validateFormPostService, validateFormPutService } from "@/utils/validations";
-import { useRouter } from "next/router";
 import { useState } from "react";
 
 const useService = ({
@@ -14,18 +13,8 @@ const useService = ({
   data?: any;
   registratorRole?: string;
 }) => {
-  function getInitialFormPutData(data: any) {
-    return {
-      email: data.email,
-      name: data.name,
-      duration: data.duration,
-      coverage: data.coverage,
-    };
-  }
-  const router = useRouter();
-
   const [formPostData, setFormPostData] = useState<
-    formPostDataToRegister | any
+    FormPostDataToRegister | any
   >({
     email: "",
     name: "",
@@ -33,9 +22,12 @@ const useService = ({
     coverage: "",
   });
 
-  const [formPutData, setFormPutData] = useState<formPostDataToRegister | any>(
-    getInitialFormPutData(data)
-  );
+  const [formPutData, setFormPutData] = useState<FormPostDataToRegister>({
+    email: "",
+    name: "",
+    duration: "",
+    coverage: "",
+  });
 
   const [errors, setErrors] = useState<ErrorsFormPostData>({});
 
@@ -129,12 +121,6 @@ const useService = ({
   
       if (dataFetch.status !== 201) {
         setErrors({ api: dataFetch.message });
-      }
-      if (
-        dataFetch.message === "Client user created successfully" &&
-        registratorRole === "CLIENT"
-      ) {
-        router.push("/auth/login");
       }
   
       setFormPostData(

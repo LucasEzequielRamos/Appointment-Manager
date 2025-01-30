@@ -63,6 +63,7 @@ interface ServiceToRegister extends Service {
 
 interface FormPostDataToRegister extends Partial<Omit<User, "user_id" | "client" | "professional">> {
   availability?: Availability[];
+  name?: string;
   duration?: string;
   coverage?: string;
   confirm_password?: string;
@@ -73,6 +74,7 @@ interface FormPostDataToRegister extends Partial<Omit<User, "user_id" | "client"
 
 interface ErrorsFormPostData extends Partial<Record<keyof FormPostDataToRegister, string>> {
   api?: string;
+  name?: string;
 }
 
 // Session and auth
