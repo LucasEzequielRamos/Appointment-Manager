@@ -43,8 +43,9 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
         <h3 className="font-bold mt-4">Ver datos:</h3>
         <div className="flex space-x-4 border-b-2 pb-2 mb-4">
           <button
-            className={`px-4 py-2 ${activeTab === "user" ? "border-b-2 border-blue-500" : ""
-              }`}
+            className={`px-4 py-2 ${
+              activeTab === "user" ? "border-b-2 border-blue-500" : ""
+            }`}
             onClick={() => {
               setActiveTab("user");
               setFormView(false);
@@ -53,8 +54,9 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
             Usuarios
           </button>
           <button
-            className={`px-4 py-2 ${activeTab === "service" ? "border-b-2 border-blue-500" : ""
-              }`}
+            className={`px-4 py-2 ${
+              activeTab === "service" ? "border-b-2 border-blue-500" : ""
+            }`}
             onClick={() => {
               setActiveTab("service");
               setFormView(false);
@@ -63,8 +65,9 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
             Servicios
           </button>
           <button
-            className={`px-4 py-2 ${activeTab === "appointment" ? "border-b-2 border-blue-500" : ""
-              }`}
+            className={`px-4 py-2 ${
+              activeTab === "appointment" ? "border-b-2 border-blue-500" : ""
+            }`}
             onClick={() => {
               setActiveTab("appointment");
               setFormView(false);
@@ -73,8 +76,9 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
             Turnos
           </button>
           <button
-            className={`px-4 py-2 ${activeTab === "professional" ? "border-b-2 border-blue-500" : ""
-              }`}
+            className={`px-4 py-2 ${
+              activeTab === "professional" ? "border-b-2 border-blue-500" : ""
+            }`}
             onClick={() => {
               setActiveTab("professional");
               setFormView(false);
@@ -83,10 +87,11 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
             Profesionales
           </button>
           <button
-            className={`px-4 py-2 ${activeTab === "professionalData"
+            className={`px-4 py-2 ${
+              activeTab === "professionalData"
                 ? "border-b-2 border-blue-500"
                 : ""
-              }`}
+            }`}
             onClick={() => {
               setActiveTab("professionalData");
               setFormView(false);
@@ -101,84 +106,138 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
           {data[activeTab as TabType]?.length >= 1 ? (
             data[activeTab as TabType].map((item: any) => (
               <div key={item.id || item.user_id}>
-                  {activeTab === "user" && (
-                    <div className="flex gap-10 items-center my-10" key={item.user_id || item.id}>
-                      {item.first_name} {item.last_name} ({item.role})
-                      <button onClick={() => setFormView(formView === item.user_id ? false : item.user_id)}>
-                        Editar
-                      </button>
-                      {formView === item.user_id && <UpdateForm data={item} />}
-                      <button onClick={async () => await deleteUserById(item.user_id)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  )}
-                  {activeTab === "service" && (
-                    <div className="flex gap-10 items-center my-10" key={item.service_id || item.id}>
-                      {item.name} ({item.coverage})
-                      <button onClick={() => setFormView(formView === item.service_id ? false : item.service_id)}>
-                        Editar
-                      </button>
-                      {formView === item.id && <UpdateForm data={item} />}
-                      <button onClick={async () => await deleteSeviceById(item.id)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  )}
-                  {activeTab === "appointment" && (
-                    <div className="flex gap-10 items-center my-10" key={item.appointment_id || item.id}>
-                      {item.appointment_date} ({item.appointment_time})
-                      <button onClick={() => setFormView(formView === item.appointment_id ? false : item.appointment_id)}>
-                        Editar
-                      </button>
-                      {formView === item.appointment_id && <UpdateForm data={item} />}
-                      <button onClick={async () => await deleteUserById(item.appointment_id)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  )}
-                  {activeTab === "professional" && (
-                    <div className="flex gap-10 items-center my-10" key={item.professional_id || item.id}>
-                      {item.professional_name} ({item.professional_specialty})
-                      <button onClick={() => setFormView(formView === item.professional_id ? false : item.professional_id)}>
-                        Editar
-                      </button>
-                      {formView === item.professional_id && <UpdateForm data={item} />}
-                      <button onClick={async () => await deleteUserById(item.professional_id)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <p>No hay datos disponibles para esta pestaña.</p>
-            )}
-          </div>
-
-          {activeTab === "professionalData" && (
-                <div>
-                  <h4 className="text-lg font-semibold">Mis Datos:</h4>
-                  <p>
-                    <strong>Nombre:</strong> {user.first_name}
-                  </p>
-                  <p>
-                    <strong>Apellido:</strong> {user.last_name}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {user.email}
-                  </p>
-                  <button
-                    onClick={() => setFormView(!formView)}
-                    className="mt-4 p-2 flex w-fit bg-blue-500 text-white rounded"
+                {activeTab === "user" && (
+                  <div
+                    className="flex gap-10 items-center my-10"
+                    key={item.user_id || item.id}
                   >
-                    Ver/Actualizar Mis Datos
-                  </button>
-                </div>
-              )}
-
-          {formView === true && <UpdateForm data={user} />}
+                    {item.first_name} {item.last_name} ({item.role})
+                    <button
+                      onClick={() =>
+                        setFormView(
+                          formView === item.user_id ? false : item.user_id
+                        )
+                      }
+                    >
+                      Editar
+                    </button>
+                    {formView === item.user_id && <UpdateForm data={item} />}
+                    <button
+                      onClick={async () => await deleteUserById(item.user_id)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+                {activeTab === "service" && (
+                  <div
+                    className="flex gap-10 items-center my-10"
+                    key={item.service_id || item.id}
+                  >
+                    {item.name} ({item.coverage})
+                    <button
+                      onClick={() =>
+                        setFormView(
+                          formView === item.service_id ? false : item.service_id
+                        )
+                      }
+                    >
+                      Editar
+                    </button>
+                    {formView === item.id && <UpdateForm data={item} />}
+                    {/* <button onClick={async () => await deleteServiceById(item.id)}>
+                        Eliminar
+                      </button> */}
+                  </div>
+                )}
+                {activeTab === "appointment" && (
+                  <div
+                    className="flex gap-10 items-center my-10"
+                    key={item.appointment_id || item.id}
+                  >
+                    {item.appointment_date} ({item.appointment_time})
+                    <button
+                      onClick={() =>
+                        setFormView(
+                          formView === item.appointment_id
+                            ? false
+                            : item.appointment_id
+                        )
+                      }
+                    >
+                      Editar
+                    </button>
+                    {formView === item.appointment_id && (
+                      <UpdateForm data={item} />
+                    )}
+                    <button
+                      onClick={async () =>
+                        await deleteUserById(item.appointment_id)
+                      }
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+                {activeTab === "professional" && (
+                  <div
+                    className="flex gap-10 items-center my-10"
+                    key={item.professional_id || item.id}
+                  >
+                    {item.professional_name} ({item.professional_specialty})
+                    <button
+                      onClick={() =>
+                        setFormView(
+                          formView === item.professional_id
+                            ? false
+                            : item.professional_id
+                        )
+                      }
+                    >
+                      Editar
+                    </button>
+                    {formView === item.professional_id && (
+                      <UpdateForm data={item} />
+                    )}
+                    <button
+                      onClick={async () =>
+                        await deleteUserById(item.professional_id)
+                      }
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No hay datos disponibles para esta pestaña.</p>
+          )}
         </div>
+
+        {activeTab === "professionalData" && (
+          <div>
+            <h4 className="text-lg font-semibold">Mis Datos:</h4>
+            <p>
+              <strong>Nombre:</strong> {user.first_name}
+            </p>
+            <p>
+              <strong>Apellido:</strong> {user.last_name}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
+            <button
+              onClick={() => setFormView(!formView)}
+              className="mt-4 p-2 flex w-fit bg-blue-500 text-white rounded"
+            >
+              Ver/Actualizar Mis Datos
+            </button>
+          </div>
+        )}
+
+        {formView === true && <UpdateForm data={user} />}
+      </div>
     </main>
   );
 };

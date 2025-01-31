@@ -10,6 +10,7 @@ const UpdateForm = ({ data }: any) => {
     handleSubmit,
     formPutData,
     handleCoverageChange,
+    fetchData,
   } = useRegister({
     apiUrl: `/api/user/${data.user_id}`,
     userType: data.role,
@@ -17,7 +18,9 @@ const UpdateForm = ({ data }: any) => {
     data: data,
   });
 
-  return (
+  return fetchData ? (
+    ""
+  ) : (
     <div className="flex items-center justify-center text-black bg-gray-800">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Cambio de datos</h2>

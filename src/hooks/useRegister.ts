@@ -21,6 +21,8 @@ const useRegister = ({
   const router = useRouter();
 
   const searchParams = useSearchParams();
+  
+  const [fetchData, setFetchData]:any = useState()
 
   function getInitialFormPostData(searchParams: URLSearchParams) {
     return {
@@ -144,13 +146,23 @@ const useRegister = ({
     });
     const dataFetch = await res.json();
 
-    if (dataFetch.status !== 201) {
+    if (dataFetch.status !== 201 && dataFetch.status !== 200 ) {
+      console.log(dataFetch.status)
       setErrors({ api: dataFetch.message });
     } else if (  
-      registratorRole !== "ADMIN"
+      registratorRole !== "ADMIN" && method === "POST"
     ) {
       router.push("/auth/login");
+    } else if (method === 'PUT'){
+      setFetchData ({
+        message: 'Se ha actualizado correctamente la informacion',
+        user:dataFetch.user,
+        status: dataFetch.status
+      })
     }
+    
+
+    console.log(fetchData)
 
     setFormPostData(
        {
@@ -176,6 +188,7 @@ const useRegister = ({
     formPostData,
     handleCoverageChange,
     formPutData,
+    fetchData
   };
 };
 
