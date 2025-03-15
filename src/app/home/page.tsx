@@ -1,15 +1,20 @@
 import { auth } from "@/auth";
-import React from "react";
+import LogoutButton from "@/Components/Buttons/LogoutButton";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 const page = async () => {
   const session = await auth();
-
-  console.log(session, "SESSION DESDE HOME");
+  if (!session) redirect("/");
 
   return (
-    <div>
-      <p>fasfa</p>
-      <p>Home page</p>
+    <div className="flex flex-col items-start p-2 gap-4">
+      <h1>Bienvenido, {session?.user?.name}</h1>
+      <p>Email: {session?.user?.email}</p>
+      <Link href={`dashboard/${session.user.id}`}>
+        Ir a Dashboard de {session.user.role}
+      </Link>
+      <LogoutButton />
     </div>
   );
 };

@@ -6,14 +6,23 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  theme: {
-    extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-      },
-    },
+  plugins: [require("daisyui")],
+  daisyui: {
+     themes: [
+       {
+         mytheme: {
+           primary: "#4f46e5",
+           secondary: "#7973F0",
+           accent: "#7F7E9B",
+           neutral: "#e0e7ff",
+           "base-100": "#1f2937",
+           info: "#3b82f6",
+           success: "#53DC2B",
+           warning: "#F58747",
+           error: "#F04E41",
+         },
+       },
+     ],
   },
-  plugins: [],
 };
 export default config;

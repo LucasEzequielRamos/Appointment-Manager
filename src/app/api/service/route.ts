@@ -1,0 +1,70 @@
+import { type NextRequest, NextResponse } from 'next/server';
+import db from '@/lib/db';
+
+export async function POST(req: NextRequest) {
+  try {
+    const {  email, name, coverage, duration, availability  } = await req.json()
+
+    if (!email|| !name|| !coverage||!duration|| !availability ) {
+      return NextResponse.json({ message: 'Todos los campos son obligatorios.' , status:400});
+    }
+
+    const userFound = await db.user.findUnique({
+      where: { email: email },
+    });
+   
+    if(!userFound || userFound.role !== 'PROFESSIONAL'){
+        return NextResponse.json({ message: 'No existe un usuario profesional con ese correo electronico', status: 404})
+    }
+
+    const newService = await db.service.create({
+        data: {
+          name: name,
+          duration: duration,
+          coverage: coverage,
+          professional: { connect: { professional_id: userFound?.user_id } },
+          availability: {
+            create: availability.map((avail: any) => ({
+              day: avail.day,
+              time_slot:{ create: avail.time_slot}
+            }))
+          },
+        }
+      });
+
+
+    return NextResponse.json({ message: 'Servicio agregado correctamente', service: newService, status: 201 });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({
+      message: 'Error creating service',
+      error: error.message,
+      status: 500 });
+  }
+}
+export async function GET(req: NextRequest) {
+  try {
+
+    const servicesFound = await db.service.findMany({
+        include:{
+          availability:{
+            include:{
+              time_slot: true
+            }
+          },
+        }
+        
+      });
+
+      if(!servicesFound) return NextResponse.json({ message: 'Servicios no encontrados', status: 404 });
+
+    return NextResponse.json({ message: 'Servicios encontrados correctamente', service: servicesFound ,  status: 200 });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({
+      message: 'Error getting services',
+      error: error.message,
+      status: 500 });
+  }
+}
+
